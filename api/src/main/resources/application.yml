@@ -1,0 +1,19 @@
+server:
+  servlet:
+    encoding:
+      charset: utf-8
+      enabled: true
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    max-connections: 10000
+    accept-count: 100
+    connection-timeout: 20000
+    keep-alive-timeout: 20000
+
+  port: 8888
+
+spring:
+  config:
+    import: application.yml, application-infra.yml

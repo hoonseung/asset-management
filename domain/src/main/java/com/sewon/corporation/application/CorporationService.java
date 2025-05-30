@@ -1,0 +1,36 @@
+package com.sewon.corporation.application;
+
+import com.sewon.corporation.model.Corporation;
+import com.sewon.corporation.repository.CorporationRepository;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+@Service
+public class CorporationService {
+
+    private final CorporationRepository corporationRepository;
+
+
+    @Transactional
+    public void registerCorporation(Corporation corporation) {
+        corporationRepository.save(corporation);
+    }
+
+    @Transactional
+    public void deleteCorporationById(Long id) {
+        corporationRepository.deleteById(id);
+    }
+
+    public Corporation findByCorporationById(Long id) {
+        return corporationRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("해당 법인을 찾을 수 없습니다."));
+    }
+
+    public List<Corporation> findAllCorporation() {
+        return corporationRepository.findAll();
+    }
+}
