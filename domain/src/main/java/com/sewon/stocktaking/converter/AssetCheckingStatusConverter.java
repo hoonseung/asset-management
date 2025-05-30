@@ -2,10 +2,10 @@ package com.sewon.stocktaking.converter;
 
 import com.sewon.stocktaking.constant.AssetCheckingStatus;
 import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import java.util.Objects;
 
-@Convert
+@Converter
 public class AssetCheckingStatusConverter implements
     AttributeConverter<AssetCheckingStatus, Integer> {
 

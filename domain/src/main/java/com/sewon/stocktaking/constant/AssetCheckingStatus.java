@@ -7,9 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum AssetCheckingStatus {
 
-    MATCH("확인일치", 0),
-    MISMATCH("확인불일치", 1),
-    UNKNOWN("확인불가", 2),
+    MATCH("확인일치", 1),
+    MISMATCH("확인불일치", 0),
 
     ;
 

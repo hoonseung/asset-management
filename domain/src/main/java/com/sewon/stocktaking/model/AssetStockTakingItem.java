@@ -6,10 +6,10 @@ import static lombok.AccessLevel.PROTECTED;
 
 import com.sewon.asset.model.Asset;
 import com.sewon.assetlocation.model.AssetLocation;
+import com.sewon.common.converter.BooleanConverter;
 import com.sewon.common.model.BaseTime;
 import com.sewon.stocktaking.constant.AssetCheckingStatus;
-import com.sewon.stocktaking.constant.AssetStockTakingStatus;
-import com.sewon.stocktaking.converter.AssetStockTakingStatusConverter;
+import com.sewon.stocktaking.converter.AssetCheckingStatusConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -19,7 +19,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,19 +43,9 @@ public class AssetStockTakingItem extends BaseTime {
     @Column(name = "id")
     private Long id;
 
-    @Convert(converter = AssetStockTakingStatusConverter.class)
-    @Column(name = "stock_taking_status", nullable = false)
-    private AssetStockTakingStatus assetStockTakingStatus;
-
-    @Column(name = "checked_at", nullable = false)
-    private LocalDateTime checkedDate;
-
-    @Convert(converter = AssetStockTakingStatusConverter.class)
+    @Convert(converter = AssetCheckingStatusConverter.class)
     @Column(name = "checking_status", nullable = false)
     private AssetCheckingStatus assetCheckingStatus;
-
-    @Column(name = "remark", length = 300)
-    private String remark;
 
     @ManyToOne(targetEntity = Asset.class, fetch = LAZY, optional = false)
     @JoinColumn(name = "asset_id", nullable = false)
@@ -69,4 +58,26 @@ public class AssetStockTakingItem extends BaseTime {
     @ManyToOne(targetEntity = AssetLocation.class, fetch = LAZY, optional = false)
     @JoinColumn(name = "asset_location_id", nullable = false)
     private AssetLocation assetLocation;
+
+    @Convert(converter = BooleanConverter.class)
+    @Column(name = "is_changed")
+    private Boolean isChanged;
+
+
+    public static AssetStockTakingItem of(String location,
+        Asset asset, AssetStockTaking assetStockTaking, AssetLocation assetLocation,
+        Boolean isChanged) {
+        return new AssetStockTakingItem(null, getAssetCheckingStatus(asset, location), asset,
+            assetStockTaking,
+            assetLocation, isChanged);
+    }
+
+    public static AssetCheckingStatus getAssetCheckingStatus(Asset asset, String location) {
+        if (asset.getAssetLocation().isEqualLocation(location)) {
+            return AssetCheckingStatus.MATCH;
+        } else {
+            return AssetCheckingStatus.MISMATCH;
+        }
+    }
+
 }
