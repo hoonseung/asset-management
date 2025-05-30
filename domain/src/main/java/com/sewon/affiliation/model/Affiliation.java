@@ -1,17 +1,26 @@
 package com.sewon.affiliation.model;
 
+import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
+import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.common.model.BaseTime;
+import com.sewon.corporation.model.Corporation;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.SQLDelete;
@@ -19,7 +28,6 @@ import org.hibernate.annotations.SQLDelete;
 @SQLDelete(sql = "UPDATE affiliation SET deleted_at = now() WHERE id = ?")
 @FilterDef(name = "affiliationDeletedFilter", autoEnabled = true)
 @Filter(name = "affiliationDeletedFilter", condition = "deleted_at IS NULL")
-@AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Table(name = "affiliation")
@@ -31,11 +39,38 @@ public class Affiliation extends BaseTime {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "company", length = 50, nullable = false)
-    private String company;
+    @Setter
+    @ManyToOne(targetEntity = Corporation.class, optional = false, fetch = LAZY)
+    @JoinColumn(name = "corporation_id")
+    private Corporation corporation;
 
     @Column(name = "department", length = 50, nullable = false)
     private String department;
 
+    @BatchSize(size = 20)
+    @OneToMany(mappedBy = "affiliation")
+    private final List<AssetLocation> assetLocations = new ArrayList<>();
 
+    public Affiliation(Long id, Corporation corporation, String department) {
+        this.id = id;
+        this.corporation = corporation;
+        this.department = department;
+    }
+
+    public static Affiliation of(Corporation corporation, String department) {
+        return new Affiliation(null, corporation, department);
+    }
+
+    public String getCorporation() {
+        return corporation.getName();
+    }
+
+    public AssetLocation findLocation(String location) {
+        for (AssetLocation assetLocation : assetLocations) {
+            if (assetLocation.getLocation().equals(location)) {
+                return assetLocation;
+            }
+        }
+        throw new IllegalArgumentException("세부위치를 찾을 수 없습니다.");
+    }
 }
