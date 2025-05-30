@@ -22,7 +22,7 @@ import org.hibernate.annotations.SQLDelete;
 
 @SQLDelete(sql = "UPDATE asset_location SET deleted_at = now() WHERE id = ?")
 @FilterDef(name = "assetLocationDeletedFilter", autoEnabled = true)
-@Filter(name = "assetLocationDeletedFilter", condition = "deleted_at IN NULL")
+@Filter(name = "assetLocationDeletedFilter", condition = "deleted_at IS NULL")
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
@@ -38,7 +38,24 @@ public class AssetLocation extends BaseTime {
     @Column(name = "location", length = 50, nullable = false)
     private String location;
 
-    @ManyToOne(targetEntity = AssetLocation.class, fetch = LAZY, optional = false)
+    @ManyToOne(targetEntity = Affiliation.class, fetch = LAZY, optional = false)
     @JoinColumn(name = "affiliation_id", nullable = false)
     private Affiliation affiliation;
+
+
+    public static AssetLocation of(String location, Affiliation affiliation) {
+        return new AssetLocation(null, location, affiliation);
+    }
+
+    public String getCorporation() {
+        return this.affiliation.getCorporation();
+    }
+
+    public String getDepartment() {
+        return this.affiliation.getDepartment();
+    }
+
+    public boolean isEqualLocation(String location) {
+        return this.location.equals(location);
+    }
 }
