@@ -5,8 +5,8 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.sewon.account.model.Account;
+import com.sewon.common.converter.BooleanConverter;
 import com.sewon.common.model.BaseTime;
-import com.sewon.notification.converter.IsReadConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -44,7 +44,7 @@ public class Notification extends BaseTime {
     @Column(name = "notification_at", nullable = false, updatable = false)
     private LocalDateTime notificationDate;
 
-    @Convert(converter = IsReadConverter.class)
+    @Convert(converter = BooleanConverter.class)
     @Column(name = "is_read", nullable = false)
     private Boolean isRead;
 
