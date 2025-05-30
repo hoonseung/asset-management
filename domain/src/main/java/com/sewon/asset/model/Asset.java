@@ -13,7 +13,9 @@ import com.sewon.asset.converter.AssetDivisionConverter;
 import com.sewon.asset.converter.AssetStatusConverter;
 import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.assettype.model.AssetType;
+import com.sewon.barcode.model.Barcode;
 import com.sewon.common.model.BaseTime;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorColumn;
@@ -23,11 +25,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.SQLDelete;
@@ -73,6 +77,7 @@ public class Asset extends BaseTime {
     @JoinColumn(name = "asset_type_id", nullable = false)
     private AssetType assetType;
 
+    @Setter
     @ManyToOne(targetEntity = Account.class, optional = false, fetch = LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
@@ -81,5 +86,73 @@ public class Asset extends BaseTime {
     @JoinColumn(name = "asset_location_id", nullable = false)
     private AssetLocation assetLocation;
 
+    @Setter
+    @OneToOne(mappedBy = "asset", cascade = CascadeType.ALL)
+    private Barcode barcode;
 
+
+    public static Asset of(AssetDivision assetDivision, AssetStatus assetStatus,
+        String manufacturer, String model, Integer acquisitionPrice, LocalDateTime acquisitionDate,
+        AssetType assetType, Account account, AssetLocation assetLocation) {
+        return new Asset(
+            null,
+            assetDivision,
+            assetStatus,
+            manufacturer,
+            model,
+            acquisitionPrice,
+            acquisitionDate,
+            assetType,
+            account,
+            assetLocation,
+            null);
+    }
+
+    public Long getAssetTypeId() {
+        return this.assetType.getId();
+    }
+
+    public Long getAssetLocationId() {
+        return this.assetLocation.getId();
+    }
+
+    public String getBarcodeValue() {
+        return this.barcode.getValue();
+    }
+
+    public String getCorporation() {
+        return this.assetLocation.getCorporation();
+    }
+
+    public String getDepartment() {
+        return this.assetLocation.getDepartment();
+    }
+
+    public String getLocation() {
+        return this.assetLocation.getLocation();
+    }
+
+    public String getDivision() {
+        return this.assetDivision.getDescription();
+    }
+
+    public String getStatus() {
+        return this.assetStatus.getDescription();
+    }
+
+    public String getParentCategory() {
+        return this.assetType.getParentCategoryName();
+    }
+
+    public String getChildCategory() {
+        return this.assetType.getChildCategoryName();
+    }
+
+    public String getAccountName() {
+        return this.account.getName();
+    }
+
+    public int getAssetStatusValue() {
+        return this.assetStatus.getValue();
+    }
 }

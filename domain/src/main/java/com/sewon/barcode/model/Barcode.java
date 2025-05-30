@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,4 +43,22 @@ public class Barcode extends BaseTime {
     @OneToOne(targetEntity = Asset.class, fetch = LAZY, optional = false)
     @JoinColumn(name = "asset_id", nullable = false)
     private Asset asset;
+
+
+    public static Barcode createBarcode(Asset asset) {
+        Barcode barcode = new Barcode(null, createBarcodeValue(asset), asset);
+        asset.setBarcode(barcode);
+        return barcode;
+    }
+
+    public static String createBarcodeValue(Asset asset) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
+        String datePrefix = formatter.format(LocalDate.now());
+        String assetDelimiterValue = "A" + asset.getId();
+        String assetTypeDelimiterValue = "T" + asset.getAssetTypeId();
+        String locationDelimiterValue = "L" + asset.getAssetLocationId();
+        return String.join("", datePrefix, assetDelimiterValue,
+            assetTypeDelimiterValue,
+            locationDelimiterValue);
+    }
 }

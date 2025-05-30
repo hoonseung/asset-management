@@ -1,2 +1,4 @@
 rootProject.name = 'asset-management'
 include 'domain'
+include 'infra'
+include 'api'

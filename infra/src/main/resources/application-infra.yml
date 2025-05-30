@@ -1,7 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: persistence
   datasource:
     driver-class-name: org.postgresql.Driver
     username: ${DB_USER:postgres}
