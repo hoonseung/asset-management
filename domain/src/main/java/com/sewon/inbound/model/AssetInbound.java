@@ -60,4 +60,10 @@ public class AssetInbound extends BaseTime {
     @JoinColumn(name = "asset_location_id", nullable = false)
     private AssetLocation assetLocation;
 
+
+    public static AssetInbound of(InboundType inboundType, LocalDateTime inboundDate,
+        Account account,
+        Asset asset, AssetLocation assetLocation) {
+        return new AssetInbound(null, inboundType, inboundDate, account, asset, assetLocation);
+    }
 }
