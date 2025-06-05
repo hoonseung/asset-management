@@ -59,4 +59,11 @@ public class AssetOutbound extends BaseTime {
     @ManyToOne(targetEntity = AssetLocation.class, fetch = LAZY, optional = false)
     @JoinColumn(name = "asset_location_id", nullable = false)
     private AssetLocation assetLocation;
+
+
+    public static AssetOutbound of(OutboundType outboundType, LocalDateTime outboundDate,
+        Account account,
+        Asset asset, AssetLocation assetLocation) {
+        return new AssetOutbound(null, outboundType, outboundDate, account, asset, assetLocation);
+    }
 }

@@ -10,14 +10,18 @@ import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.common.model.BaseTime;
 import com.sewon.inbound.model.AssetInbound;
 import com.sewon.outbound.model.AssetOutbound;
+import com.sewon.rental.constant.RentalStatus;
+import com.sewon.rental.converter.RentalStatusConverter;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,17 +56,103 @@ public class AssetRental extends BaseTime {
     @JoinColumn(name = "asset_location_id", nullable = false)
     private AssetLocation assetLocation;
 
-    @ManyToOne(targetEntity = AssetInbound.class, fetch = LAZY)
+    @ManyToOne(targetEntity = AssetInbound.class, fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "asset_inbound_id")
     private AssetInbound assetInbound;
 
-    @ManyToOne(targetEntity = AssetOutbound.class, fetch = LAZY)
+    @ManyToOne(targetEntity = AssetOutbound.class, fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "asset_outbound_id")
     private AssetOutbound assetOutbound;
 
+    @Convert(converter = RentalStatusConverter.class)
+    @Column(name = "status", nullable = false)
+    private RentalStatus rentalStatus;
+
     @Column(name = "rented_at", nullable = false)
-    private LocalDateTime rentalDate;
+    private LocalDate rentalDate;
+
+    @Column(name = "from_at", nullable = false)
+    private LocalDate fromDate;
+
+    @Column(name = "to_at", nullable = false)
+    private LocalDate toDate;
 
     @Column(name = "returned_at")
-    private LocalDateTime returnDate;
+    private LocalDate returnDate;
+
+
+    public static AssetRental of(Account account, Asset asset, AssetLocation assetLocation,
+        AssetInbound assetInbound, AssetOutbound assetOutbound, RentalStatus status,
+        LocalDate rentalDate,
+        LocalDate fromDate, LocalDate toDate, LocalDate returnDate) {
+        return new AssetRental(null, account, asset, assetLocation, assetInbound, assetOutbound,
+            status, rentalDate, fromDate, toDate, returnDate);
+    }
+
+    public static AssetRental request(Account account, Asset asset, AssetLocation assetLocation,
+        RentalStatus status, LocalDate rentalDate, LocalDate fromDate, LocalDate toDate,
+        LocalDate returnDate) {
+        return of(account, asset, assetLocation, null, null,
+            status, rentalDate, fromDate, toDate, returnDate);
+    }
+
+
+    public void inbounded(AssetInbound inbound) {
+        this.assetInbound = inbound;
+    }
+
+    public void outbounded(AssetOutbound outbound) {
+        this.assetOutbound = outbound;
+    }
+
+    public void rentalApprove() {
+        this.rentalStatus = RentalStatus.RENT;
+    }
+
+
+    public String getBarcodeValue() {
+        return asset.getBarcodeValue();
+    }
+
+    public String getCorporation() {
+        return asset.getCorporation();
+    }
+
+    public String getDepartment() {
+        return asset.getDepartment();
+    }
+
+    public String getAssetLocation() {
+        return asset.getLocation();
+    }
+
+    public AssetLocation getToLocation() {
+        return assetLocation;
+    }
+
+    public AssetLocation getFromLocation() {
+        return asset.getAssetLocation();
+    }
+
+    public String getRentLocation() {
+        return assetLocation.getLocation();
+    }
+
+    public String getParentCategory() {
+        return asset.getParentCategory();
+    }
+
+    public String getChildCategory() {
+        return asset.getChildCategory();
+    }
+
+    public String getRenter() {
+        return account.getName();
+    }
+
+    public String getRegister() {
+        return asset.getAccountName();
+    }
+
+
 }

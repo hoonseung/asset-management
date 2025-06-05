@@ -1,4 +1,4 @@
-package com.sewon.stocktaking;
+package com.sewon.stocktaking.controller;
 
 import com.sewon.common.response.ApiResponse;
 import com.sewon.stocktaking.application.StockTakingService;

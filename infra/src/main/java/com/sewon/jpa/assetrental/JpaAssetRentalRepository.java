@@ -1,5 +1,6 @@
 package com.sewon.jpa.assetrental;
 
+import com.sewon.rental.constant.RentalStatus;
 import com.sewon.rental.model.AssetRental;
 import com.sewon.rental.repository.AssetRentalRepository;
 import java.util.List;
@@ -31,6 +32,17 @@ public class JpaAssetRentalRepository implements AssetRentalRepository {
     @Override
     public List<AssetRental> findAllByAccountName(String username) {
         return assetRentalJpaRepository.findAllByAccountName(username);
+    }
+
+    @Override
+    public List<AssetRental> findAllByRentalStatus(RentalStatus status) {
+        return assetRentalJpaRepository.findAllByRentalStatus(status);
+    }
+
+    @Override
+    public List<AssetRental> findAllByAccountNameAndRentalStatus(String username,
+        RentalStatus status) {
+        return assetRentalJpaRepository.findAllByAccountNameAndRentalStatus(username, status);
     }
 
     @Override
