@@ -1,11 +1,14 @@
 package com.sewon.stocktaking.application;
 
+import static com.sewon.stocktaking.exception.StockTakingErrorCode.STOCK_TAKING_ALREADY_LOCATION;
+
 import com.sewon.account.application.AccountService;
 import com.sewon.account.model.Account;
 import com.sewon.asset.model.Asset;
 import com.sewon.assetlocation.application.AssetLocationService;
 import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.barcode.application.BarcodeService;
+import com.sewon.common.exception.DomainException;
 import com.sewon.stocktaking.model.AssetStockTaking;
 import com.sewon.stocktaking.model.AssetStockTakingItem;
 import com.sewon.stocktaking.repository.AssetStockTakingItemRepository;
@@ -38,7 +41,7 @@ public class StockTakingService {
         Account account = accountService.findAccountById(id);
 
         assetStockTakingRepository.findByLocationAndAuditingDate(assetLocation, auditingDate)
-            .ifPresent(item -> new RuntimeException("해당일에 이미 진행한 실사 위치입니다."));
+            .ifPresent(item -> new DomainException(STOCK_TAKING_ALREADY_LOCATION));
 
         List<AssetStockTakingItem> items = new ArrayList<>();
         AssetStockTaking assetStockTaking = assetStockTakingRepository.save(

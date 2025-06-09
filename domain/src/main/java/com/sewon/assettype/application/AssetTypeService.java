@@ -1,7 +1,10 @@
 package com.sewon.assettype.application;
 
+import static com.sewon.assettype.exception.AssetTypeErrorCode.ASSET_TYPE_NOT_FOUND;
+
 import com.sewon.assettype.model.AssetType;
 import com.sewon.assettype.repository.AssetTypeRepository;
+import com.sewon.common.exception.DomainException;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -31,12 +34,12 @@ public class AssetTypeService {
 
     public AssetType findAssetTypeById(Long id) {
         return assetTypeRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("자산분류나 품목을 찾을 수 없습니다."));
+            .orElseThrow(() -> new DomainException(ASSET_TYPE_NOT_FOUND));
     }
 
     public AssetType findAssetByParentAndChildType(String parentType, String childType) {
         return assetTypeRepository.findByParentAndChildType(parentType, childType)
-            .orElseThrow(() -> new RuntimeException("자산분류나 품목을 찾을 수 없습니다."));
+            .orElseThrow(() -> new DomainException(ASSET_TYPE_NOT_FOUND));
     }
 
     public List<AssetType> findAllParentAssetType() {

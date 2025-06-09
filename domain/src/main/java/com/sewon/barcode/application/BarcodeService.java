@@ -1,8 +1,12 @@
 package com.sewon.barcode.application;
 
+import static com.sewon.barcode.exception.BarcodeErrorCode.ASSET_BARCODE_NOT_FOUND;
+import static com.sewon.barcode.exception.BarcodeErrorCode.BARCODE_NOT_FOUND;
+
 import com.sewon.asset.model.Asset;
 import com.sewon.barcode.model.Barcode;
 import com.sewon.barcode.repository.BarcodeRepository;
+import com.sewon.common.exception.DomainException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +31,11 @@ public class BarcodeService {
 
     public Barcode findBarcodeByValue(String value) {
         return barcodeRepository.findByValue(value)
-            .orElseThrow(() -> new RuntimeException("존재하지 않는 바코드입니다."));
+            .orElseThrow(() -> new DomainException(BARCODE_NOT_FOUND));
     }
 
     public Asset findAssetByValue(String value) {
         return barcodeRepository.findAssetByValue(value)
-            .orElseThrow(() -> new RuntimeException("현재 바코드로 자산을 찾을 수 없습니다."));
+            .orElseThrow(() -> new DomainException(ASSET_BARCODE_NOT_FOUND));
     }
 }

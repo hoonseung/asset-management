@@ -1,5 +1,8 @@
 package com.sewon.corporation.application;
 
+import static com.sewon.corporation.exception.CorporationErrorCode.CORPORATION_NOT_FOUND;
+
+import com.sewon.common.exception.DomainException;
 import com.sewon.corporation.model.Corporation;
 import com.sewon.corporation.repository.CorporationRepository;
 import java.util.List;
@@ -27,7 +30,7 @@ public class CorporationService {
 
     public Corporation findByCorporationById(Long id) {
         return corporationRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("해당 법인을 찾을 수 없습니다."));
+            .orElseThrow(() -> new DomainException(CORPORATION_NOT_FOUND));
     }
 
     public List<Corporation> findAllCorporation() {

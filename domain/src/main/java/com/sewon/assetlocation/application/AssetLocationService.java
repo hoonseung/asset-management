@@ -1,9 +1,12 @@
 package com.sewon.assetlocation.application;
 
+import static com.sewon.assetlocation.exception.LocationErrorCode.LOCATION_NOT_FOUND;
+
 import com.sewon.affiliation.application.AffiliationService;
 import com.sewon.affiliation.model.Affiliation;
 import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.assetlocation.repository.AssetLocationRepository;
+import com.sewon.common.exception.DomainException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,12 +38,12 @@ public class AssetLocationService {
 
     public AssetLocation findAssetLocationById(Long id) {
         return assetLocationRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("자산위치가 존재하지 않습니다."));
+            .orElseThrow(() -> new DomainException(LOCATION_NOT_FOUND));
     }
 
     public AssetLocation findAssetLocationByLocation(String location) {
         return assetLocationRepository.findByLocation(location)
-            .orElseThrow(() -> new RuntimeException("자산위치가 존재하지 않습니다."));
+            .orElseThrow(() -> new DomainException(LOCATION_NOT_FOUND));
     }
 
     public List<AssetLocation> findAllAssetLocation() {

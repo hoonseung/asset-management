@@ -1,7 +1,11 @@
 package com.sewon.account.application;
 
+import static com.sewon.account.exception.AccountErrorCode.USER_DUPLICATED;
+import static com.sewon.account.exception.AccountErrorCode.USER_NOT_FOUND;
+
 import com.sewon.account.model.Account;
 import com.sewon.account.repository.AccountRepository;
+import com.sewon.common.exception.DomainException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,17 +18,21 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     @Transactional
-    public Account registerAccount(Account account) {
-        return accountRepository.save(account);
+    public void registerAccount(Account account) {
+        if (accountRepository.findByUsername(account.getUsername()).isEmpty()) {
+            accountRepository.save(account);
+            return;
+        }
+        throw new DomainException(USER_DUPLICATED);
     }
 
     public Account findAccountById(Long id) {
         return accountRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new DomainException(USER_NOT_FOUND));
     }
 
     public Account findAccountByUsername(String username) {
         return accountRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new DomainException(USER_NOT_FOUND));
     }
 }

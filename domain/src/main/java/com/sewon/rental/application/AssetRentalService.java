@@ -1,5 +1,6 @@
 package com.sewon.rental.application;
 
+import static com.sewon.rental.exception.RentalErrorCode.RENTAL_NOT_FOUND;
 import static java.time.LocalDateTime.now;
 
 import com.sewon.account.application.AccountService;
@@ -8,6 +9,7 @@ import com.sewon.asset.application.AssetService;
 import com.sewon.asset.model.Asset;
 import com.sewon.assetlocation.application.AssetLocationService;
 import com.sewon.assetlocation.model.AssetLocation;
+import com.sewon.common.exception.DomainException;
 import com.sewon.inbound.constant.InboundType;
 import com.sewon.inbound.model.AssetInbound;
 import com.sewon.outbound.constant.OutboundType;
@@ -60,7 +62,7 @@ public class AssetRentalService {
 
     public AssetRental findAssetRentalById(Long id) {
         return assetRentalRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("자산대여를 찾을 수 없습니다."));
+            .orElseThrow(() -> new DomainException(RENTAL_NOT_FOUND));
     }
 
     public List<AssetRental> findAllAssetRental() {

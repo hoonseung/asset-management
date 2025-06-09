@@ -1,5 +1,7 @@
 package com.sewon.asset.application;
 
+import static com.sewon.asset.exception.AssetErrorCode.ASSET_NOT_FOUND;
+
 import com.sewon.account.application.AccountService;
 import com.sewon.account.model.Account;
 import com.sewon.affiliation.application.AffiliationService;
@@ -11,6 +13,7 @@ import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.assettype.application.AssetTypeService;
 import com.sewon.assettype.model.AssetType;
 import com.sewon.barcode.model.Barcode;
+import com.sewon.common.exception.DomainException;
 import com.sewon.inbound.application.AssetInboundService;
 import com.sewon.inbound.constant.InboundType;
 import com.sewon.inbound.model.AssetInbound;
@@ -113,12 +116,12 @@ public class AssetService {
 
     public Asset findAssetById(Long id) {
         return assetRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("자산이 존재하지 않습니다."));
+            .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND));
     }
 
     public Asset findAssetByBarcode(String value) {
         return assetRepository.findByBarcode(value)
-            .orElseThrow(() -> new RuntimeException("자산이 존재하지 않습니다."));
+            .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND));
     }
 
     public List<Asset> findAllAsset() {
