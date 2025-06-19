@@ -17,3 +17,9 @@ server:
 spring:
   config:
     import: application.yml, application-infra.yml
+
+
+jwt:
+  secret: ${JWT_SECRET:JWSEREWSEWQEASDASDADWASDADASS32SS112355WASDASADAKBDLTMWSD}
+  access-token-expiration: ${JWT_ACCESS_EXPIRE:900000}
+  refresh-token-expiration: ${JWT_REFRESH_EXPIRE:1800000}

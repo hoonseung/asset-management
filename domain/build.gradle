@@ -2,4 +2,5 @@ jar.enabled = true
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.mindrot:jbcrypt:0.4'
 }

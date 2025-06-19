@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.SQLDelete;
@@ -26,7 +27,7 @@ import org.hibernate.annotations.SQLDelete;
 
 @SQLDelete(sql = "UPDATE account SET deleted_at = now() WHERE id = ?")
 @FilterDef(name = "accountDeletedFilter", autoEnabled = true)
-@Filter(name = "accountDeletedFilter", condition = "deleted_at IS NULL = :isDeleted")
+@Filter(name = "accountDeletedFilter", condition = "deleted_at IS NULL")
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
@@ -48,6 +49,7 @@ public class Account extends BaseTime {
     @Column(name = "name", length = 50, nullable = false)
     private String name;
 
+    @Setter
     @ManyToOne(targetEntity = Affiliation.class, fetch = LAZY, optional = false)
     @JoinColumn(name = "affiliation_id", nullable = false)
     private Affiliation affiliation;
@@ -55,4 +57,17 @@ public class Account extends BaseTime {
     @Convert(converter = RoleConverter.class)
     @Column(name = "role")
     private Role role;
+
+
+    public static Account createGeneral(String username, String password, String name) {
+        return new Account(null, username, password, name, null, Role.GENERAL);
+    }
+
+    public static Account createAdmin(String username, String password, String name) {
+        return new Account(null, username, password, name, null, Role.ADMIN);
+    }
+
+    public void passwordEncrypting(String encryptedPassword) {
+        this.password = encryptedPassword;
+    }
 }

@@ -19,5 +19,9 @@ public record ApiResponse<T>(
         return new ApiResponse<>(1, data);
     }
 
+    public static <T> ApiResponse<T> fail() {
+        return new ApiResponse<>(0, null);
+    }
+
 
 }

@@ -10,11 +10,13 @@ import com.sewon.asset.response.AssetListResponse;
 import com.sewon.asset.response.AssetOneResponse;
 import com.sewon.common.response.ApiPagingResponse;
 import com.sewon.common.response.ApiResponse;
+import com.sewon.security.model.auth.AuthUser;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,23 +36,28 @@ public class AssetController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<String>> registerAsset(
-        @Valid @RequestBody AssetRegistrationRequest request) {
-        Asset asset = assetService.registerAsset(request.toGeneralAssetProperties(), 1L);
+        @Valid @RequestBody AssetRegistrationRequest request,
+        @AuthenticationPrincipal AuthUser authUser) {
+        Asset asset = assetService.registerAsset(request.toGeneralAssetProperties(),
+            authUser.getId());
         return ResponseEntity.ok(ApiResponse.ok(asset.getBarcodeValue()));
     }
 
     @PostMapping("/electronic")
     public ResponseEntity<ApiResponse<String>> registerElectronicAsset(
-        @Valid @RequestBody ElectronicAssetRegistrationRequest request) {
-        Asset asset = assetService.registerAsset(request.toElectronicAssetProperties(), 1L);
+        @Valid @RequestBody ElectronicAssetRegistrationRequest request,
+        @AuthenticationPrincipal AuthUser authUser) {
+        Asset asset = assetService.registerAsset(request.toElectronicAssetProperties(),
+            authUser.getId());
         return ResponseEntity.ok(ApiResponse.ok(asset.getBarcodeValue()));
     }
 
     @PostMapping("/bulk")
     public ResponseEntity<ApiResponse<List<String>>> registerAssetList(
-        @RequestBody AssetListRegistrationRequest request) {
+        @RequestBody AssetListRegistrationRequest request,
+        @AuthenticationPrincipal AuthUser authUser) {
         List<Asset> assets = assetService.registerAssetList(request.toGeneralAssetPropertiesList(),
-            1L);
+            authUser.getId());
         return ResponseEntity.ok(ApiResponse.ok(assets.stream()
             .map(Asset::getBarcodeValue)
             .toList()));
@@ -58,9 +65,10 @@ public class AssetController {
 
     @PostMapping("/electronic/bulk")
     public ResponseEntity<ApiResponse<List<String>>> registerElectronicAssetList(
-        @RequestBody ElectronicAssetListRegistrationRequest request) {
+        @RequestBody ElectronicAssetListRegistrationRequest request,
+        @AuthenticationPrincipal AuthUser authUser) {
         List<Asset> assets = assetService.registerAssetList(request.toGeneralAssetPropertiesList(),
-            1L);
+            authUser.getId());
         return ResponseEntity.ok(ApiResponse.ok(assets.stream()
             .map(Asset::getBarcodeValue)
             .toList()));

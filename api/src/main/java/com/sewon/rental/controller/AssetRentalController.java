@@ -1,4 +1,4 @@
-package com.sewon.rental;
+package com.sewon.rental.controller;
 
 import com.sewon.common.response.ApiResponse;
 import com.sewon.rental.application.AssetRentalService;
@@ -6,9 +6,11 @@ import com.sewon.rental.model.AssetRental;
 import com.sewon.rental.request.RentalApproveRequest;
 import com.sewon.rental.request.RentalRequestRequest;
 import com.sewon.rental.response.RentalListResponse;
+import com.sewon.security.model.auth.AuthUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,9 +31,10 @@ public class AssetRentalController {
     @PostMapping("/request")
     public ResponseEntity<ApiResponse<Void>> requestAssetRental(
         @RequestBody RentalRequestRequest request,
-        Long id) {
+        @AuthenticationPrincipal AuthUser authUser) {
         assetRentalService.requestAssetRental(
-            request.assetId(), request.locationId(), request.fromDate(), request.toDate(), 1L);
+            request.assetId(), request.locationId(), request.fromDate(), request.toDate(),
+            authUser.getId());
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
@@ -54,18 +57,21 @@ public class AssetRentalController {
 
 
     @GetMapping("/request/user")
-    public ResponseEntity<ApiResponse<RentalListResponse>> findAllMyRequestingAssetRentalByAccountName() {
+    public ResponseEntity<ApiResponse<RentalListResponse>> findAllMyRequestingAssetRentalByAccountName(
+        @AuthenticationPrincipal AuthUser authUser) {
         RentalListResponse response = RentalListResponse.from(
-            assetRentalService.findAllMyRequestingAssetRentalByAccountName("admin"));
+            assetRentalService.findAllMyRequestingAssetRentalByAccountName(authUser.getUsername()));
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
 
     @GetMapping("/user")
-    public ResponseEntity<ApiResponse<RentalListResponse>> findAllAssetRentalByAccountName() {
+    public ResponseEntity<ApiResponse<RentalListResponse>> findAllAssetRentalByAccountName(
+        @AuthenticationPrincipal AuthUser authUser) {
         List<AssetRental> assetRentals = assetRentalService.findAllAssetRentedByAccountName(
             "admin");
-        assetRentals.addAll(assetRentalService.findAllAssetRentExpireByAccountName("admin"));
+        assetRentals.addAll(
+            assetRentalService.findAllAssetRentExpireByAccountName(authUser.getUsername()));
         RentalListResponse response = RentalListResponse.from(assetRentals);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
