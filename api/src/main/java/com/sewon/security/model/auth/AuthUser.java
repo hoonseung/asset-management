@@ -24,6 +24,7 @@ public class AuthUser implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
+            .map(role -> "ROLE_" + role)
             .map(SimpleGrantedAuthority::new)
             .toList();
     }

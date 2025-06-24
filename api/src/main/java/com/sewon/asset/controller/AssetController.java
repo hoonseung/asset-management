@@ -4,6 +4,7 @@ import com.sewon.asset.application.AssetService;
 import com.sewon.asset.model.Asset;
 import com.sewon.asset.request.AssetListRegistrationRequest;
 import com.sewon.asset.request.AssetRegistrationRequest;
+import com.sewon.asset.request.AssetSearchRequest;
 import com.sewon.asset.request.electronic.ElectronicAssetListRegistrationRequest;
 import com.sewon.asset.request.electronic.ElectronicAssetRegistrationRequest;
 import com.sewon.asset.response.AssetListResponse;
@@ -11,14 +12,13 @@ import com.sewon.asset.response.AssetOneResponse;
 import com.sewon.common.response.ApiPagingResponse;
 import com.sewon.common.response.ApiResponse;
 import com.sewon.security.model.auth.AuthUser;
-import jakarta.validation.Valid;
-import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +36,7 @@ public class AssetController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<String>> registerAsset(
-        @Valid @RequestBody AssetRegistrationRequest request,
+        @RequestBody AssetRegistrationRequest request,
         @AuthenticationPrincipal AuthUser authUser) {
         Asset asset = assetService.registerAsset(request.toGeneralAssetProperties(),
             authUser.getId());
@@ -45,7 +45,7 @@ public class AssetController {
 
     @PostMapping("/electronic")
     public ResponseEntity<ApiResponse<String>> registerElectronicAsset(
-        @Valid @RequestBody ElectronicAssetRegistrationRequest request,
+        @RequestBody ElectronicAssetRegistrationRequest request,
         @AuthenticationPrincipal AuthUser authUser) {
         Asset asset = assetService.registerAsset(request.toElectronicAssetProperties(),
             authUser.getId());
@@ -95,14 +95,26 @@ public class AssetController {
     }
 
     @GetMapping("/paged")
-    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllAsset(
-        @RequestParam(name = "size", defaultValue = "30") int size) {
-        AssetListResponse listResponse = AssetListResponse.from(assetService.findAllAsset(size));
+    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllByCondition(
+        @ModelAttribute AssetSearchRequest request
+    ) {
+        AssetListResponse listResponse = AssetListResponse.from(
+            assetService.findAllByCondition(
+                request.toAssetSearchProperties()));
         return ResponseEntity.ok(
-            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
+            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize())
+        );
     }
 
-    @GetMapping("/paged/by-location")
+//    @GetMapping("/paged")
+//    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllAsset(
+//        @RequestParam(name = "size", defaultValue = "30") int size) {
+//        AssetListResponse listResponse = AssetListResponse.from(assetService.findAllAsset(size));
+//        return ResponseEntity.ok(
+//            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
+//    }
+
+/*    @GetMapping("/paged/by-location")
     public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllAssetByLocation(
         @RequestParam("location") String location,
         @RequestParam(name = "size", defaultValue = "30") int size) {
@@ -175,7 +187,7 @@ public class AssetController {
             assetService.findAllBetween(after, before, size));
         return ResponseEntity.ok(
             ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
-    }
+    }*/
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteAssetById(

@@ -5,12 +5,16 @@ import static com.sewon.asset.exception.AssetErrorCode.ASSET_NOT_FOUND;
 import com.sewon.account.application.AccountService;
 import com.sewon.account.model.Account;
 import com.sewon.affiliation.application.AffiliationService;
+import com.sewon.affiliation.exception.AffiliationErrorCode;
 import com.sewon.affiliation.model.Affiliation;
 import com.sewon.asset.dto.AssetProperties;
+import com.sewon.asset.dto.AssetSearchProperties;
 import com.sewon.asset.model.Asset;
 import com.sewon.asset.repository.AssetRepository;
+import com.sewon.asset.repository.AssetSearchRepository;
 import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.assettype.application.AssetTypeService;
+import com.sewon.assettype.exception.AssetTypeErrorCode;
 import com.sewon.assettype.model.AssetType;
 import com.sewon.barcode.model.Barcode;
 import com.sewon.common.exception.DomainException;
@@ -33,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AssetService {
 
     private final AssetRepository assetRepository;
+    private final AssetSearchRepository assetSearchRepository;
     private final AccountService accountService;
     private final AffiliationService affiliationService;
     private final AssetTypeService assetTypeService;
@@ -72,6 +77,13 @@ public class AssetService {
 
         Map<String, AssetType> assetTypeMap =
             cachingAssetType(assetTypeService.findAll());
+
+        if (affiliationMap.isEmpty()) {
+            throw new DomainException(AffiliationErrorCode.AFFILIATION_NOT_FOUND);
+        }
+        if (assetTypeMap.isEmpty()) {
+            throw new DomainException(AssetTypeErrorCode.ASSET_TYPE_NOT_FOUND);
+        }
 
         Account account = accountService.findAccountById(id);
         for (AssetProperties assetProperties : properties) {
@@ -172,6 +184,10 @@ public class AssetService {
             before.atTime(23, 59, 59, 999_999),
             size
         );
+    }
+
+    public List<Asset> findAllByCondition(AssetSearchProperties properties) {
+        return assetSearchRepository.searchAssets(properties);
     }
 
 

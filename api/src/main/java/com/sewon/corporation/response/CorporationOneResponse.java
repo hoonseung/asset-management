@@ -7,7 +7,7 @@ import java.util.List;
 
 public record CorporationOneResponse(
 
-    Long id,
+    Long corporationId,
     String name,
     String nationType,
     @JsonProperty("affiliationList")

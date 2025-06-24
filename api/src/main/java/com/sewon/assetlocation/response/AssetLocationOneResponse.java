@@ -3,7 +3,7 @@ package com.sewon.assetlocation.response;
 import com.sewon.assetlocation.model.AssetLocation;
 
 public record AssetLocationOneResponse(
-    Long id,
+    Long locationId,
     String location
 ) {
 

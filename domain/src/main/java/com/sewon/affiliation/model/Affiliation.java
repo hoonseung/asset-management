@@ -4,7 +4,9 @@ import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
+import com.sewon.assetlocation.exception.LocationErrorCode;
 import com.sewon.assetlocation.model.AssetLocation;
+import com.sewon.common.exception.DomainException;
 import com.sewon.common.model.BaseTime;
 import com.sewon.corporation.model.Corporation;
 import jakarta.persistence.Column;
@@ -71,6 +73,6 @@ public class Affiliation extends BaseTime {
                 return assetLocation;
             }
         }
-        throw new IllegalArgumentException("세부위치를 찾을 수 없습니다.");
+        throw new DomainException(LocationErrorCode.LOCATION_NOT_FOUND);
     }
 }

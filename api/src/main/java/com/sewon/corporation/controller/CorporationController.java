@@ -44,11 +44,4 @@ public class CorporationController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    //TODO account 도메인 작성 후 작업
-    @GetMapping("/{accountId}")
-    public ResponseEntity<ApiResponse<CorporationOneResponse>> findCorporationByAccount(
-        @PathVariable("accountId") Long accountId) {
-        return null;
-    }
-
 }

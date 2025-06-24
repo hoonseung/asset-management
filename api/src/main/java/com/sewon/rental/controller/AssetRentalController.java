@@ -69,7 +69,7 @@ public class AssetRentalController {
     public ResponseEntity<ApiResponse<RentalListResponse>> findAllAssetRentalByAccountName(
         @AuthenticationPrincipal AuthUser authUser) {
         List<AssetRental> assetRentals = assetRentalService.findAllAssetRentedByAccountName(
-            "admin");
+            authUser.getUsername());
         assetRentals.addAll(
             assetRentalService.findAllAssetRentExpireByAccountName(authUser.getUsername()));
         RentalListResponse response = RentalListResponse.from(assetRentals);
