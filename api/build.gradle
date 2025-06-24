@@ -4,6 +4,10 @@ bootJar.enabled = true
 dependencies {
     implementation project(':domain')
     implementation project(':infra')
+    // domain 모듈을 의존하고 있기 때문에 컴파일 시점에 JPA 어노테이션을 참조하기 위한 API
+    // 인터페이스만 제공하기 때문에 실제 구현체는 infra 모듈에 존재해야함
+    compileOnly 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
@@ -11,3 +15,20 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 }
+
+
+bootBuildImage {
+    builder = "docker.io/paketobuildpacks/builder-jammy-base"
+    imageName = project.findProperty("imageName") ?: "${project.name}"
+    environment = ["BP.JVM_VERSION": "21.*"]
+
+
+    docker {
+        publishRegistry {
+            username = project.findProperty("registryUsername")
+            password = project.findProperty("registryToken")
+            url = project.findProperty("registryUrl")
+        }
+    }
+}
+
