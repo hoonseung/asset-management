@@ -1,6 +1,6 @@
 package com.sewon.affiliation.response;
 
-import com.sewon.affiliation.model.Affiliation;
+import com.sewon.affiliation.dto.AffiliationResult;
 import com.sewon.assetlocation.response.AssetLocationOneResponse;
 import java.util.List;
 
@@ -12,12 +12,12 @@ public record AffiliationOneResponse(
     List<AssetLocationOneResponse> locations
 ) {
 
-    public static AffiliationOneResponse from(Affiliation affiliation) {
+    public static AffiliationOneResponse from(AffiliationResult affiliation) {
         return new AffiliationOneResponse(
-            affiliation.getId(),
-            affiliation.getCorporation(),
-            affiliation.getDepartment(),
-            affiliation.getAssetLocations().stream()
+            affiliation.id(),
+            affiliation.getCorporationName(),
+            affiliation.department(),
+            affiliation.assetLocations().stream()
                 .map(AssetLocationOneResponse::from)
                 .toList()
         );

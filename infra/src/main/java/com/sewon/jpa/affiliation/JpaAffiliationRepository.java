@@ -14,8 +14,8 @@ public class JpaAffiliationRepository implements AffiliationRepository {
     private final AffiliationJpaRepository affiliationJpaRepository;
 
     @Override
-    public void save(Affiliation affiliation) {
-        affiliationJpaRepository.save(affiliation);
+    public Affiliation save(Affiliation affiliation) {
+        return affiliationJpaRepository.save(affiliation);
     }
 
     @Override
@@ -27,6 +27,11 @@ public class JpaAffiliationRepository implements AffiliationRepository {
     public Optional<Affiliation> findByDepartmentAndCorporation(String department,
         String corporation) {
         return affiliationJpaRepository.findByDepartmentAndCorporationName(department, corporation);
+    }
+
+    @Override
+    public List<Affiliation> findAllByCorporationId(Long corporationId) {
+        return affiliationJpaRepository.findAllByCorporationId(corporationId);
     }
 
     @Override

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 public enum AffiliationErrorCode implements ErrorCode {
 
     AFFILIATION_NOT_FOUND("AFFILIATION_001", "소속을 찾을 수 없습니다."),
+    DEPARTMENT_DUPLICATION("AFFILIATION_002", "소속이름이 이미 존재합니다."),
+    AFFILIATION_DELETE_ERROR("AFFILIATION_002", "해당 소속을 삭제할 수 없습니다."),
 
     ;
 

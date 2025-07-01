@@ -1,7 +1,7 @@
 package com.sewon.affiliation.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sewon.affiliation.model.Affiliation;
+import com.sewon.affiliation.dto.AffiliationResult;
 import java.util.List;
 
 public record AffiliationListResponse(
@@ -10,9 +10,9 @@ public record AffiliationListResponse(
     List<AffiliationOneResponse> responses
 ) {
 
-    public static AffiliationListResponse from(List<Affiliation> affiliation) {
+    public static AffiliationListResponse from(List<AffiliationResult> affiliations) {
         return new AffiliationListResponse(
-            affiliation.stream()
+            affiliations.stream()
                 .map(AffiliationOneResponse::from)
                 .toList()
         );
