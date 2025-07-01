@@ -1,6 +1,6 @@
 package com.sewon.account.response;
 
-import com.sewon.account.model.Account;
+import com.sewon.account.dto.AccountResult;
 import com.sewon.security.model.auth.AccessToken;
 import com.sewon.security.model.auth.RefreshToken;
 import java.time.LocalDateTime;
@@ -11,6 +11,7 @@ public record AccountLoginResponse(
     Long affiliationId,
     String username,
     String name,
+    String role,
     String corporation,
     String department,
     AccessToken accessToken,
@@ -18,15 +19,16 @@ public record AccountLoginResponse(
     String loginDate
 ) {
 
-    public static AccountLoginResponse from(Account account, AccessToken accessToken,
+    public static AccountLoginResponse from(AccountResult account, AccessToken accessToken,
         RefreshToken refreshToken) {
         return new AccountLoginResponse(
-            account.getId(),
-            account.getAffiliation().getId(),
-            account.getUsername(),
-            account.getName(),
-            account.getAffiliation().getCorporation(),
-            account.getAffiliation().getDepartment(),
+            account.id(),
+            account.affiliationId(),
+            account.username(),
+            account.name(),
+            account.role(),
+            account.corporation(),
+            account.department(),
             accessToken,
             refreshToken,
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))

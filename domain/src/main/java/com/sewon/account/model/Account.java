@@ -40,7 +40,7 @@ public class Account extends BaseTime {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "username", length = 50, nullable = false)
+    @Column(name = "username", length = 50, nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", length = 350, nullable = false)
@@ -65,6 +65,15 @@ public class Account extends BaseTime {
 
     public static Account createAdmin(String username, String password, String name) {
         return new Account(null, username, password, name, null, Role.ADMIN);
+    }
+
+    public void updateInfo(String name, String username) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (username != null) {
+            this.username = username;
+        }
     }
 
     public void passwordEncrypting(String encryptedPassword) {

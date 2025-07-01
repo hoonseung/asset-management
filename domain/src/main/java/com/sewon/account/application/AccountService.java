@@ -4,6 +4,7 @@ import static com.sewon.account.exception.AccountErrorCode.USER_DUPLICATED;
 import static com.sewon.account.exception.AccountErrorCode.USER_NOT_FOUND;
 import static com.sewon.account.exception.AccountErrorCode.USER_PW_INVALID;
 
+import com.sewon.account.dto.AccountResult;
 import com.sewon.account.model.Account;
 import com.sewon.account.repository.AccountRepository;
 import com.sewon.affiliation.application.AffiliationService;
@@ -39,10 +40,26 @@ public class AccountService {
         throw new DomainException(USER_DUPLICATED);
     }
 
-    public Account loginAccount(String username, String rawPassword) {
+    @Transactional
+    public AccountResult updateAccount(Long affiliationId, String newName, String newUsername,
+        String newPassword, String owner) {
+        Account account = accountRepository.findByUsername(owner)
+            .orElseThrow(() -> new DomainException(USER_NOT_FOUND));
+        if (affiliationId != null) {
+            Affiliation affiliation = affiliationService.findAffiliationById(affiliationId);
+            account.setAffiliation(affiliation);
+        }
+        account.updateInfo(newName, newUsername);
+        if (newPassword != null) {
+            account.passwordEncrypting(PasswordHasher.hash(newPassword));
+        }
+        return AccountResult.from(account);
+    }
+
+    public AccountResult loginAccount(String username, String rawPassword) {
         Account account = findAccountByUsername(username);
         if (PasswordHasher.matches(rawPassword, account.getPassword())) {
-            return account;
+            return AccountResult.from(account);
         }
         throw new DomainException(USER_PW_INVALID);
     }
@@ -73,4 +90,6 @@ public class AccountService {
         jwtBlackListService.blacklistRefreshToken(id);
         return true;
     }
+
+
 }
