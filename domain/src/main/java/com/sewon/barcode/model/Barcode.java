@@ -45,20 +45,15 @@ public class Barcode extends BaseTime {
     private Asset asset;
 
 
-    public static Barcode createBarcode(Asset asset) {
-        Barcode barcode = new Barcode(null, createBarcodeValue(asset), asset);
+    public static void createBarcode(Asset asset) {
+        Barcode barcode = new Barcode(null, createBarcodeValue(), asset);
         asset.setBarcode(barcode);
-        return barcode;
     }
 
-    public static String createBarcodeValue(Asset asset) {
+    public static String createBarcodeValue() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
         String datePrefix = formatter.format(LocalDate.now());
-        String assetDelimiterValue = "A" + asset.getId();
-        String assetTypeDelimiterValue = "T" + asset.getAssetTypeId();
-        String locationDelimiterValue = "L" + asset.getAssetLocationId();
-        return String.join("", datePrefix, assetDelimiterValue,
-            assetTypeDelimiterValue,
-            locationDelimiterValue);
+        String uniqueSuffix = java.util.UUID.randomUUID().toString().substring(0, 4);
+        return String.join("", datePrefix, uniqueSuffix);
     }
 }

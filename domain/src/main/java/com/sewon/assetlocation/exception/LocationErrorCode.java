@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 public enum LocationErrorCode implements ErrorCode {
 
     LOCATION_NOT_FOUND("LOCATION_01", "위치를 찾을 수 없습니다."),
+    LOCATION_DUPLICATION("LOCATION_02", "위치가 중복됩니다."),
 
     ;
 

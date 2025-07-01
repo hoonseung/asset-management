@@ -13,9 +13,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.SQLDelete;
@@ -26,7 +28,8 @@ import org.hibernate.annotations.SQLDelete;
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-@Table(name = "asset_location")
+@Table(name = "asset_location", uniqueConstraints = @UniqueConstraint(name = "uk_affiliationId_location_",
+    columnNames = {"affiliation_id", "location"}))
 @Entity
 public class AssetLocation extends BaseTime {
 
@@ -35,6 +38,7 @@ public class AssetLocation extends BaseTime {
     @Column(name = "id")
     private Long id;
 
+    @Setter
     @Column(name = "location", length = 50, nullable = false)
     private String location;
 
@@ -48,7 +52,7 @@ public class AssetLocation extends BaseTime {
     }
 
     public String getCorporation() {
-        return this.affiliation.getCorporation();
+        return this.affiliation.getCorporationName();
     }
 
     public String getDepartment() {

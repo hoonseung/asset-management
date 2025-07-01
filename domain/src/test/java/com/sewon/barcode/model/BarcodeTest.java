@@ -13,7 +13,7 @@ class BarcodeTest {
     @DisplayName("바코드 값이 원하는대로 생성되는지 테스트")
     @Test
     void create_barcode_value() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMM");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
         String datePrefix = formatter.format(LocalDate.now());
         String assetDelimiterValue = "A" + 1L;
         String assetTypeDelimiterValue = "T" + 5L;
