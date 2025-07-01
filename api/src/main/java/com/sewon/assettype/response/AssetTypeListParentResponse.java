@@ -1,7 +1,7 @@
 package com.sewon.assettype.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sewon.assettype.model.AssetType;
+import com.sewon.assettype.dto.AssetTypeParentResult;
 import java.util.List;
 
 public record AssetTypeListParentResponse(
@@ -12,7 +12,7 @@ public record AssetTypeListParentResponse(
 ) {
 
 
-    public static AssetTypeListParentResponse from(List<AssetType> assetType) {
+    public static AssetTypeListParentResponse from(List<AssetTypeParentResult> assetType) {
         return new AssetTypeListParentResponse(assetType.stream()
             .map(AssetTypeOneParentResponse::from)
             .toList()

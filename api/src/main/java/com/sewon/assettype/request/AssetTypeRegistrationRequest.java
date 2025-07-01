@@ -4,6 +4,7 @@ import com.sewon.assettype.model.AssetType;
 import com.sewon.common.constant.NationType;
 
 public record AssetTypeRegistrationRequest(
+
     Long parentId,
     String name,
     String nationType

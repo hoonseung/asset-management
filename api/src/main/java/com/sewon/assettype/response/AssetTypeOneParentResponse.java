@@ -3,7 +3,7 @@ package com.sewon.assettype.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sewon.assettype.model.AssetType;
+import com.sewon.assettype.dto.AssetTypeParentResult;
 import java.util.List;
 
 public record AssetTypeOneParentResponse(
@@ -17,11 +17,11 @@ public record AssetTypeOneParentResponse(
 ) {
 
 
-    public static AssetTypeOneParentResponse from(AssetType assetType) {
+    public static AssetTypeOneParentResponse from(AssetTypeParentResult assetType) {
         return new AssetTypeOneParentResponse(
-            assetType.getId(),
-            assetType.getName(),
-            assetType.getAssetTypes().stream()
+            assetType.parentId(),
+            assetType.parentName(),
+            assetType.assetTypeChildResults().stream()
                 .map(AssetTypeOneChildResponse::from)
                 .toList()
         );

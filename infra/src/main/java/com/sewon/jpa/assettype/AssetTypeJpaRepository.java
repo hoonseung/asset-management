@@ -10,6 +10,11 @@ public interface AssetTypeJpaRepository extends JpaRepository<AssetType, Long> {
 
     Optional<AssetType> findByNameAndAssetTypeName(String childType, String parentType);
 
+    Optional<AssetType> findByName(String name);
+
     @Query("select a from AssetType a where a.assetType.id is null ")
     List<AssetType> findAllParentType();
+
+    List<AssetType> findAllByAssetTypeId(Long id);
+
 }

@@ -41,6 +41,7 @@ public class AssetType extends BaseTime {
     @Column(name = "id")
     private Long id;
 
+    @Setter
     @Column(name = "name", length = 50, nullable = false)
     private String name;
 
@@ -49,7 +50,8 @@ public class AssetType extends BaseTime {
     @JoinColumn(name = "asset_type_id")
     private AssetType assetType;
 
-    @BatchSize(size = 30)
+    @Filter(name = "assetTypeDeletedFilter", condition = "deleted_at is NULL")
+    @BatchSize(size = 50)
     @OneToMany(mappedBy = "assetType")
     private final List<AssetType> assetTypes = new ArrayList<>();
 

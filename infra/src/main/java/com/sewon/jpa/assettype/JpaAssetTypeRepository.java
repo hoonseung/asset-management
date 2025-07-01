@@ -29,6 +29,11 @@ public class JpaAssetTypeRepository implements AssetTypeRepository {
     }
 
     @Override
+    public Optional<AssetType> findByName(String name) {
+        return assetTypeJpaRepository.findByName(name);
+    }
+
+    @Override
     public List<AssetType> findAllParentType() {
         return assetTypeJpaRepository.findAllParentType();
     }
@@ -36,6 +41,11 @@ public class JpaAssetTypeRepository implements AssetTypeRepository {
     @Override
     public List<AssetType> findAll() {
         return assetTypeJpaRepository.findAll();
+    }
+
+    @Override
+    public List<AssetType> findAllById(Long id) {
+        return assetTypeJpaRepository.findAllByAssetTypeId(id);
     }
 
     @Override

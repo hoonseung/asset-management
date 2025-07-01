@@ -12,9 +12,13 @@ public interface AssetTypeRepository {
 
     Optional<AssetType> findByParentAndChildType(String parent, String child);
 
+    Optional<AssetType> findByName(String name);
+
     List<AssetType> findAllParentType();
 
     List<AssetType> findAll();
+
+    List<AssetType> findAllById(Long id);
 
     void deleteById(Long id);
 

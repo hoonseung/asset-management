@@ -1,6 +1,6 @@
 package com.sewon.assettype.response;
 
-import com.sewon.assettype.model.AssetType;
+import com.sewon.assettype.dto.AssetTypeChildResult;
 
 public record AssetTypeOneChildResponse(
 
@@ -9,10 +9,10 @@ public record AssetTypeOneChildResponse(
 ) {
 
 
-    public static AssetTypeOneChildResponse from(AssetType assetType) {
+    public static AssetTypeOneChildResponse from(AssetTypeChildResult assetType) {
         return new AssetTypeOneChildResponse(
-            assetType.getId(),
-            assetType.getName()
+            assetType.childId(),
+            assetType.name()
         );
     }
 }
