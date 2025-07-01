@@ -9,7 +9,8 @@ public enum OutboundType {
 
     TRANSFER("이관", 0),
     RENTAL("대여", 1),
-    DISPOSE("폐기", 2),
+    RETURN("반납", 2),
+    DISPOSE("폐기", 3),
 
     ;
 

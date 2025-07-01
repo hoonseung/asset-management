@@ -9,7 +9,10 @@ public enum InboundType {
 
     REGISTRATION("등록", 0),
     RENTAL("대여", 1),
-    TRANSFER("이관", 2);
+    RETURN("반납", 2),
+    TRANSFER("이관", 3),
+    STOCK_TAKING("실사이동", 4),
+    ;
 
     private final String description;
     private final int value;

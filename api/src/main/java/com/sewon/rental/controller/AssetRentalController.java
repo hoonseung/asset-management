@@ -2,11 +2,12 @@ package com.sewon.rental.controller;
 
 import com.sewon.common.response.ApiResponse;
 import com.sewon.rental.application.AssetRentalService;
-import com.sewon.rental.model.AssetRental;
+import com.sewon.rental.dto.AssetRentalResult;
 import com.sewon.rental.request.RentalApproveRequest;
-import com.sewon.rental.request.RentalRequestRequest;
+import com.sewon.rental.request.RentalRequest;
 import com.sewon.rental.response.RentalListResponse;
 import com.sewon.security.model.auth.AuthUser;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class AssetRentalController {
 
     @PostMapping("/request")
     public ResponseEntity<ApiResponse<Void>> requestAssetRental(
-        @RequestBody RentalRequestRequest request,
+        @RequestBody RentalRequest request,
         @AuthenticationPrincipal AuthUser authUser) {
         assetRentalService.requestAssetRental(
             request.assetId(), request.locationId(), request.fromDate(), request.toDate(),
@@ -41,38 +42,35 @@ public class AssetRentalController {
 
     @PostMapping("/approve")
     public ResponseEntity<ApiResponse<Void>> approveAssetRental(
-        @RequestBody RentalApproveRequest request) {
-        assetRentalService.approveAssetRental(request.rentalId());
+        @RequestBody @Valid RentalApproveRequest request) {
+        assetRentalService.approveAssetRental(request.ids());
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<RentalListResponse>> findAllAssetRentalRequestingByDepartment(
-        @RequestParam("department") String department
+    @GetMapping("/request/others")
+    public ResponseEntity<ApiResponse<RentalListResponse>> findAllAssetRentalRequestingByOtherAffiliation(
+        @RequestParam("affiliationId") Long affiliationId
     ) {
         RentalListResponse response = RentalListResponse.from(
-            assetRentalService.findAllAssetRentalRequestingByDepartment(department));
+            assetRentalService.findAllRequestingAssetRentalByAssetAffiliation(affiliationId));
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-
-    @GetMapping("/request/user")
-    public ResponseEntity<ApiResponse<RentalListResponse>> findAllMyRequestingAssetRentalByAccountName(
-        @AuthenticationPrincipal AuthUser authUser) {
+    @GetMapping("/request/mine")
+    public ResponseEntity<ApiResponse<RentalListResponse>> findAllRequestingAssetRentalByAffiliation(
+        @RequestParam("affiliationId") Long affiliationId
+    ) {
         RentalListResponse response = RentalListResponse.from(
-            assetRentalService.findAllMyRequestingAssetRentalByAccountName(authUser.getUsername()));
+            assetRentalService.findAllRequestingAssetRentalMyAffiliation(affiliationId));
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-
-    @GetMapping("/user")
-    public ResponseEntity<ApiResponse<RentalListResponse>> findAllAssetRentalByAccountName(
-        @AuthenticationPrincipal AuthUser authUser) {
-        List<AssetRental> assetRentals = assetRentalService.findAllAssetRentedByAccountName(
-            authUser.getUsername());
-        assetRentals.addAll(
-            assetRentalService.findAllAssetRentExpireByAccountName(authUser.getUsername()));
-        RentalListResponse response = RentalListResponse.from(assetRentals);
+    @GetMapping()
+    public ResponseEntity<ApiResponse<RentalListResponse>> findAllAssetRentalByDepartment(
+        @RequestParam("affiliationId") Long affiliationId) {
+        List<AssetRentalResult> assetRentals = assetRentalService.findAllAssetRentedMyAffiliation(
+            affiliationId);
+        RentalListResponse response = RentalListResponse.fromIncludeExpire(assetRentals);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 

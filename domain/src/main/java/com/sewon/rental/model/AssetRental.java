@@ -109,6 +109,22 @@ public class AssetRental extends BaseTime {
         this.rentalStatus = RentalStatus.RENT;
     }
 
+    public void requestRentalReturn() {
+        this.rentalStatus = RentalStatus.REQUEST_RETURN;
+    }
+
+    public void returnApprove() {
+        this.rentalStatus = RentalStatus.RETURN;
+    }
+
+    public void rentalExpire() {
+        this.rentalStatus = RentalStatus.EXPIRE;
+    }
+
+    public boolean isExpire() {
+        return LocalDate.now().isAfter(this.toDate);
+    }
+
 
     public String getBarcodeValue() {
         return asset.getBarcodeValue();

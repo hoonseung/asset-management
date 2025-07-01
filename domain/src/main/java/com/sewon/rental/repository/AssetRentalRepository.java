@@ -17,7 +17,13 @@ public interface AssetRentalRepository {
 
     List<AssetRental> findAllByAccountNameAndRentalStatus(String username, RentalStatus status);
 
-    List<AssetRental> findAllByRentalStatus(RentalStatus status);
+    List<AssetRental> findAllByRentalStatusAndAssetAffiliation(RentalStatus status,
+        Long affiliationId);
+
+    List<AssetRental> findAllByRentalStatusAndMyAffiliation(RentalStatus status,
+        Long affiliationId);
+
+    List<AssetRental> findAllByIds(List<Long> ids);
 
     void deleteById(Long id);
 

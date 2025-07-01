@@ -7,9 +7,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum RentalStatus {
 
-    REQUEST("요청중", 0),
+    REQUEST_RENTAL("대여요청중", 0),
     RENT("대여중", 1),
-    EXPIRE("만료", 2),
+    REQUEST_RETURN("반납요청중", 2),
+    RETURN("반납완료", 3),
+    EXPIRE("만료", 4),
 
     ;
 

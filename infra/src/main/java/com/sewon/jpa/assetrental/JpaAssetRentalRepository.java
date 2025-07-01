@@ -35,14 +35,27 @@ public class JpaAssetRentalRepository implements AssetRentalRepository {
     }
 
     @Override
-    public List<AssetRental> findAllByRentalStatus(RentalStatus status) {
-        return assetRentalJpaRepository.findAllByRentalStatus(status);
+    public List<AssetRental> findAllByRentalStatusAndAssetAffiliation(RentalStatus status,
+        Long affiliationId) {
+        return assetRentalJpaRepository.findAllByRentalStatusAndAssetDepartment(status,
+            affiliationId);
+    }
+
+    @Override
+    public List<AssetRental> findAllByRentalStatusAndMyAffiliation(RentalStatus status,
+        Long affiliationId) {
+        return assetRentalJpaRepository.findAllByRentalStatusAndMyDepartment(status, affiliationId);
     }
 
     @Override
     public List<AssetRental> findAllByAccountNameAndRentalStatus(String username,
         RentalStatus status) {
         return assetRentalJpaRepository.findAllByAccountNameAndRentalStatus(username, status);
+    }
+
+    @Override
+    public List<AssetRental> findAllByIds(List<Long> ids) {
+        return assetRentalJpaRepository.findAllByIdIn(ids);
     }
 
     @Override

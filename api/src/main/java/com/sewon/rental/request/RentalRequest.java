@@ -2,7 +2,7 @@ package com.sewon.rental.request;
 
 import java.time.LocalDate;
 
-public record RentalRequestRequest(
+public record RentalRequest(
     Long assetId,
     Long locationId,
     LocalDate fromDate,

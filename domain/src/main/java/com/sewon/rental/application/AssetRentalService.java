@@ -1,5 +1,9 @@
 package com.sewon.rental.application;
 
+import static com.sewon.rental.constant.RentalStatus.RENT;
+import static com.sewon.rental.constant.RentalStatus.REQUEST_RENTAL;
+import static com.sewon.rental.constant.RentalStatus.REQUEST_RETURN;
+import static com.sewon.rental.constant.RentalStatus.RETURN;
 import static com.sewon.rental.exception.RentalErrorCode.RENTAL_NOT_FOUND;
 import static java.time.LocalDateTime.now;
 
@@ -15,6 +19,7 @@ import com.sewon.inbound.model.AssetInbound;
 import com.sewon.outbound.constant.OutboundType;
 import com.sewon.outbound.model.AssetOutbound;
 import com.sewon.rental.constant.RentalStatus;
+import com.sewon.rental.dto.AssetRentalResult;
 import com.sewon.rental.model.AssetRental;
 import com.sewon.rental.repository.AssetRentalRepository;
 import java.time.LocalDate;
@@ -47,11 +52,29 @@ public class AssetRentalService {
 
 
     @Transactional
-    public void approveAssetRental(Long rentalId) {
-        AssetRental assetRental = findAssetRentalById(rentalId);
-        assetRental.inbounded(getInbound(assetRental));
-        assetRental.outbounded(getOutbound(assetRental));
-        assetRental.rentalApprove();
+    public void approveAssetRental(List<Long> ids) {
+        assetRentalRepository.findAllByIds(ids)
+            .forEach(rental -> {
+                rental.inbounded(getRentalInbound(rental));
+                rental.outbounded(getRentalOutbound(rental));
+                rental.rentalApprove();
+            });
+    }
+
+    @Transactional
+    public void requestAssetReturn(List<Long> ids) {
+        assetRentalRepository.findAllByIds(ids)
+            .forEach(AssetRental::requestRentalReturn);
+    }
+
+    @Transactional
+    public void approveAssetReturn(List<Long> ids) {
+        assetRentalRepository.findAllByIds(ids)
+            .forEach(rental -> {
+                rental.outbounded(getReturnOutbound(rental));
+                rental.inbounded(getReturnInbound(rental));
+                rental.returnApprove();
+            });
     }
 
 
@@ -70,16 +93,51 @@ public class AssetRentalService {
     }
 
 
-    public List<AssetRental> findAllAssetRentalRequestingByDepartment(String department) {
-        return assetRentalRepository.findAllByRentalStatus(RentalStatus.REQUEST)
-            .stream()
-            .filter(rental -> rental.getAsset().getDepartment().equals(department))
+    public List<AssetRentalResult> findAllRequestingAssetRentalByAssetAffiliation(
+        Long affiliationId) {
+        return assetRentalRepository.findAllByRentalStatusAndAssetAffiliation(
+                REQUEST_RENTAL, affiliationId).stream()
+            .map(AssetRentalResult::from)
+            .toList();
+    }
+
+    public List<AssetRentalResult> findAllRequestingAssetRentalMyAffiliation(Long affiliationId) {
+        return assetRentalRepository.findAllByRentalStatusAndMyAffiliation(
+                REQUEST_RENTAL, affiliationId).stream()
+            .map(AssetRentalResult::from)
+            .toList();
+    }
+
+    @Transactional
+    public List<AssetRentalResult> findAllAssetRentedMyAffiliation(Long affiliationId) {
+        List<AssetRental> assetRentals = assetRentalRepository.findAllByRentalStatusAndMyAffiliation(
+            RENT, affiliationId);
+        assetRentals.stream()
+            .filter(AssetRental::isExpire)
+            .forEach(AssetRental::rentalExpire);
+
+        return assetRentals.stream().map(AssetRentalResult::from)
+            .toList();
+    }
+
+    public List<AssetRentalResult> findAllAssetReturnRequestingByAffiliation(Long affiliationId) {
+        return assetRentalRepository.findAllByRentalStatusAndAssetAffiliation(
+                REQUEST_RETURN, affiliationId).stream()
+            .map(AssetRentalResult::from)
+            .toList();
+    }
+
+    public List<AssetRentalResult> findAllAssetReturnRequestingByAssetAffiliation(
+        Long affiliationId) {
+        return assetRentalRepository.findAllByRentalStatusAndAssetAffiliation(
+                RETURN, affiliationId).stream()
+            .map(AssetRentalResult::from)
             .toList();
     }
 
     public List<AssetRental> findAllAssetRentedByAccountName(String username) {
         return assetRentalRepository.findAllByAccountNameAndRentalStatus(username,
-            RentalStatus.RENT);
+            RENT);
     }
 
     public List<AssetRental> findAllAssetRentExpireByAccountName(String username) {
@@ -89,22 +147,32 @@ public class AssetRentalService {
 
     public List<AssetRental> findAllMyRequestingAssetRentalByAccountName(String username) {
         return assetRentalRepository.findAllByAccountNameAndRentalStatus(username,
-            RentalStatus.REQUEST);
+            REQUEST_RENTAL);
     }
 
     private AssetRental getRequestAssetRental(LocalDate fromDate, LocalDate toDate, Account account,
         Asset asset, AssetLocation toLocation) {
-        return AssetRental.request(account, asset, toLocation, RentalStatus.REQUEST,
+        return AssetRental.request(account, asset, toLocation, REQUEST_RENTAL,
             LocalDate.now(), fromDate, toDate, null);
     }
 
-    private AssetOutbound getOutbound(AssetRental assetRental) {
+    private AssetInbound getRentalInbound(AssetRental assetRental) {
+        return AssetInbound.of(InboundType.RENTAL, now(), assetRental.getAccount(),
+            assetRental.getAsset(), assetRental.getToLocation());
+    }
+
+    private AssetOutbound getRentalOutbound(AssetRental assetRental) {
         return AssetOutbound.of(OutboundType.RENTAL, now(), assetRental.getAccount(),
             assetRental.getAsset(), assetRental.getFromLocation());
     }
 
-    private AssetInbound getInbound(AssetRental assetRental) {
-        return AssetInbound.of(InboundType.RENTAL, now(), assetRental.getAccount(),
+    private AssetInbound getReturnInbound(AssetRental assetRental) {
+        return AssetInbound.of(InboundType.RETURN, now(), assetRental.getAccount(),
+            assetRental.getAsset(), assetRental.getFromLocation());
+    }
+
+    private AssetOutbound getReturnOutbound(AssetRental assetRental) {
+        return AssetOutbound.of(OutboundType.RETURN, now(), assetRental.getAccount(),
             assetRental.getAsset(), assetRental.getToLocation());
     }
 
