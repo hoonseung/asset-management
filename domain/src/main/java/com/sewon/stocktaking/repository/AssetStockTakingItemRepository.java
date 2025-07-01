@@ -10,6 +10,8 @@ public interface AssetStockTakingItemRepository {
 
     void saveAll(List<AssetStockTakingItem> assetStockTakingItems);
 
+    List<AssetStockTakingItem> findAllByStockTakingId(Long stockTakingId);
+
     List<AssetStockTakingItem> findAll(String department, String location, String assetType,
         LocalDateTime after, LocalDateTime before);
 

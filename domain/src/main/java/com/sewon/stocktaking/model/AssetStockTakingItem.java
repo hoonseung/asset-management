@@ -1,5 +1,8 @@
 package com.sewon.stocktaking.model;
 
+import static com.sewon.stocktaking.constant.AssetCheckingStatus.DISABLE;
+import static com.sewon.stocktaking.constant.AssetCheckingStatus.MATCH;
+import static com.sewon.stocktaking.constant.AssetCheckingStatus.MISMATCH;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -64,20 +67,32 @@ public class AssetStockTakingItem extends BaseTime {
     private Boolean isChanged;
 
 
-    public static AssetStockTakingItem of(String location,
-        Asset asset, AssetStockTaking assetStockTaking, AssetLocation assetLocation,
-        Boolean isChanged) {
-        return new AssetStockTakingItem(null, getAssetCheckingStatus(asset, location), asset,
+    public static AssetStockTakingItem of(AssetLocation assetLocation,
+        Asset asset, AssetStockTaking assetStockTaking) {
+        AssetCheckingStatus status = getAssetCheckingStatus(asset, assetLocation);
+        return new AssetStockTakingItem(null, status, asset,
             assetStockTaking,
-            assetLocation, isChanged);
+            assetLocation, change(status));
     }
 
-    public static AssetCheckingStatus getAssetCheckingStatus(Asset asset, String location) {
-        if (asset.getAssetLocation().isEqualLocation(location)) {
-            return AssetCheckingStatus.MATCH;
-        } else {
-            return AssetCheckingStatus.MISMATCH;
+    public static AssetCheckingStatus getAssetCheckingStatus(Asset asset,
+        AssetLocation assetLocation) {
+        if (!asset.getCorporation().equals(assetLocation.getCorporation())) {
+            return DISABLE;
         }
+        if (asset.getAssetLocation().isEqualLocation(assetLocation.getLocation())) {
+            return MATCH;
+        } else {
+            return MISMATCH;
+        }
+    }
+
+    public static boolean change(AssetCheckingStatus status) {
+        return MISMATCH.equals(status);
+    }
+
+    public static boolean diable(AssetCheckingStatus status) {
+        return DISABLE.equals(status);
     }
 
 }

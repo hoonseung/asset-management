@@ -28,4 +28,15 @@ public record AssetSearchProperties(
             size
         );
     }
+
+    public AssetSearchProperties toWithOutBetween() {
+        return new AssetSearchProperties(
+            this.locationId,
+            this.parentTypeId,
+            this.childTypeId,
+            null,
+            null,
+            this.size
+        );
+    }
 }

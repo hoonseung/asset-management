@@ -24,6 +24,11 @@ public class JpaAssetStockTakingItemRepository implements AssetStockTakingItemRe
     }
 
     @Override
+    public List<AssetStockTakingItem> findAllByStockTakingId(Long stockTakingId) {
+        return assetStockTakingItemJpaRepository.findAllByAssetStockTakingId(stockTakingId);
+    }
+
+    @Override
     public List<AssetStockTakingItem> findAll(String department, String location, String assetType,
         LocalDateTime after, LocalDateTime before) {
         return List.of();

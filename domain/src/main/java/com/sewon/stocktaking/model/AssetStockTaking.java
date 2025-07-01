@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.SQLDelete;
@@ -43,7 +44,11 @@ public class AssetStockTaking extends BaseTime {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "auditing_at", nullable = false)
+    @Column(name = "starting_at", nullable = false)
+    private LocalDate startingDate;
+
+    @Setter
+    @Column(name = "auditing_at")
     private LocalDate auditingDate;
 
     @ManyToOne(targetEntity = Account.class, fetch = LAZY, optional = false)
@@ -54,8 +59,8 @@ public class AssetStockTaking extends BaseTime {
     @JoinColumn(name = "asset_location_id", nullable = false)
     private AssetLocation assetLocation;
 
-    public static AssetStockTaking of(LocalDate auditingDate, Account account,
+    public static AssetStockTaking of(LocalDate startingDate, Account account,
         AssetLocation assetLocation) {
-        return new AssetStockTaking(null, auditingDate, account, assetLocation);
+        return new AssetStockTaking(null, startingDate, null, account, assetLocation);
     }
 }
