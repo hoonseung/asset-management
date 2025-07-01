@@ -2,6 +2,8 @@ jar {
     enabled = true
 }
 
+apply from: "${rootDir}/querydsl.gradle"
+
 dependencies {
     implementation project(':domain')
 
