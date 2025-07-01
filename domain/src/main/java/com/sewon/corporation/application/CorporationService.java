@@ -3,6 +3,7 @@ package com.sewon.corporation.application;
 import static com.sewon.corporation.exception.CorporationErrorCode.CORPORATION_NOT_FOUND;
 
 import com.sewon.common.exception.DomainException;
+import com.sewon.corporation.dto.CorporationResult;
 import com.sewon.corporation.model.Corporation;
 import com.sewon.corporation.repository.CorporationRepository;
 import java.util.List;
@@ -33,7 +34,10 @@ public class CorporationService {
             .orElseThrow(() -> new DomainException(CORPORATION_NOT_FOUND));
     }
 
-    public List<Corporation> findAllCorporation() {
-        return corporationRepository.findAll();
+    public List<CorporationResult> findAllCorporation() {
+        return corporationRepository.findAll()
+            .stream()
+            .map(CorporationResult::from)
+            .toList();
     }
 }

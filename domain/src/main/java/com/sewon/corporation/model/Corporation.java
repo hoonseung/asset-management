@@ -31,7 +31,7 @@ import org.hibernate.annotations.SQLDelete;
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Entity
-@Table
+@Table(name = "corporation")
 public class Corporation extends BaseTime {
 
     @Id
@@ -46,6 +46,7 @@ public class Corporation extends BaseTime {
     @Column(name = "nation_type", nullable = false)
     private NationType nationType;
 
+    @Filter(name = "corporationDeletedFilter", condition = "deleted_at IS NULL")
     @OneToMany(mappedBy = "corporation")
     private List<Affiliation> affiliations = new ArrayList<>();
 
