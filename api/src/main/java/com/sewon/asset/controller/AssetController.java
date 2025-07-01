@@ -5,6 +5,8 @@ import com.sewon.asset.model.Asset;
 import com.sewon.asset.request.AssetListRegistrationRequest;
 import com.sewon.asset.request.AssetRegistrationRequest;
 import com.sewon.asset.request.AssetSearchRequest;
+import com.sewon.asset.request.AssetTransferRequest;
+import com.sewon.asset.request.AssetUpdateRequest;
 import com.sewon.asset.request.electronic.ElectronicAssetListRegistrationRequest;
 import com.sewon.asset.request.electronic.ElectronicAssetRegistrationRequest;
 import com.sewon.asset.response.AssetListResponse;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,6 +44,14 @@ public class AssetController {
         Asset asset = assetService.registerAsset(request.toGeneralAssetProperties(),
             authUser.getId());
         return ResponseEntity.ok(ApiResponse.ok(asset.getBarcodeValue()));
+    }
+
+    @PutMapping()
+    public ResponseEntity<ApiResponse<String>> updateAsset(
+        @RequestBody AssetUpdateRequest request,
+        @RequestParam("barcode") String barcode) {
+        assetService.updateAsset(request.toGeneralAssetProperties(), barcode);
+        return ResponseEntity.ok(ApiResponse.ok());
     }
 
     @PostMapping("/electronic")
@@ -74,10 +85,20 @@ public class AssetController {
             .toList()));
     }
 
+    @PostMapping("/transmission")
+    public ResponseEntity<ApiResponse<Void>> transferAsset(
+        @RequestBody AssetTransferRequest request,
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
+        assetService.transferAsset(request.assetId(), request.fromLocationId()
+            , request.toLocationId(), authUser.getId());
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<AssetOneResponse>> findAssetById(
         @PathVariable("id") Long id) {
-        AssetOneResponse response = AssetOneResponse.from(assetService.findAssetById(id));
+        AssetOneResponse response = AssetOneResponse.from(assetService.findAssetResultById(id));
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
@@ -106,88 +127,17 @@ public class AssetController {
         );
     }
 
-//    @GetMapping("/paged")
-//    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllAsset(
-//        @RequestParam(name = "size", defaultValue = "30") int size) {
-//        AssetListResponse listResponse = AssetListResponse.from(assetService.findAllAsset(size));
-//        return ResponseEntity.ok(
-//            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
-//    }
-
-/*    @GetMapping("/paged/by-location")
-    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllAssetByLocation(
-        @RequestParam("location") String location,
-        @RequestParam(name = "size", defaultValue = "30") int size) {
-        AssetListResponse listResponse = AssetListResponse.from(
-            assetService.findAllAssetByLocation(location, size));
-        return ResponseEntity.ok(
-            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
-    }
-
-    @GetMapping("/paged/by-location-and-childType")
-    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllAssetByLocationAndChildType(
-        @RequestParam("location") String location,
-        @RequestParam("type") String type,
-        @RequestParam(name = "size", defaultValue = "30") int size
+    @GetMapping("/paged/rental/enabled")
+    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllRentalEnableAssetByCondition(
+        @ModelAttribute AssetSearchRequest request
     ) {
         AssetListResponse listResponse = AssetListResponse.from(
-            assetService.findAllByLocationAndChildType(location, type, size));
+            assetService.findAllRentalEnableAssetByCondition(
+                request.toAssetSearchProperties()));
         return ResponseEntity.ok(
-            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
+            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize())
+        );
     }
-
-    @GetMapping("/paged/by-location-and-childType-between")
-    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllAssetByLocationAndChildTypeBetween(
-        @RequestParam("location") String location,
-        @RequestParam("type") String type,
-        @RequestParam("after") LocalDate after,
-        @RequestParam("before") LocalDate before,
-        @RequestParam(name = "size", defaultValue = "30") int size
-    ) {
-        AssetListResponse listResponse = AssetListResponse.from(
-            assetService.findAllByLocationAndChildTypeBetween(location, type, after, before, size));
-        return ResponseEntity.ok(
-            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
-    }
-
-    @GetMapping("/paged/by-location-and-parentType")
-    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllAssetByLocationAndParentType(
-        @RequestParam("location") String location,
-        @RequestParam("type") String type,
-        @RequestParam(name = "size", defaultValue = "30") int size
-    ) {
-        AssetListResponse listResponse = AssetListResponse.from(
-            assetService.findAllByLocationAndParentType(location, type, size));
-        return ResponseEntity.ok(
-            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
-    }
-
-    @GetMapping("/paged/by-location-and-parentType-between")
-    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllAssetByLocationAndParentTypeBetween(
-        @RequestParam("location") String location,
-        @RequestParam("type") String type,
-        @RequestParam("after") LocalDate after,
-        @RequestParam("before") LocalDate before,
-        @RequestParam(name = "size", defaultValue = "30") int size
-    ) {
-        AssetListResponse listResponse = AssetListResponse.from(
-            assetService.findAllByLocationAndParentTypeBetween(location, type, after, before,
-                size));
-        return ResponseEntity.ok(
-            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
-    }
-
-    @GetMapping("/paged/between")
-    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllBetween(
-        @RequestParam("after") LocalDate after,
-        @RequestParam("before") LocalDate before,
-        @RequestParam(name = "size", defaultValue = "30") int size
-    ) {
-        AssetListResponse listResponse = AssetListResponse.from(
-            assetService.findAllBetween(after, before, size));
-        return ResponseEntity.ok(
-            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize()));
-    }*/
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteAssetById(

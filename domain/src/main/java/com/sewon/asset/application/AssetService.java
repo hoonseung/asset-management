@@ -1,27 +1,31 @@
 package com.sewon.asset.application;
 
 import static com.sewon.asset.exception.AssetErrorCode.ASSET_NOT_FOUND;
+import static java.time.LocalDateTime.now;
 
 import com.sewon.account.application.AccountService;
 import com.sewon.account.model.Account;
-import com.sewon.affiliation.application.AffiliationService;
-import com.sewon.affiliation.exception.AffiliationErrorCode;
-import com.sewon.affiliation.model.Affiliation;
 import com.sewon.asset.dto.AssetProperties;
+import com.sewon.asset.dto.AssetResult;
 import com.sewon.asset.dto.AssetSearchProperties;
 import com.sewon.asset.model.Asset;
 import com.sewon.asset.repository.AssetRepository;
 import com.sewon.asset.repository.AssetSearchRepository;
+import com.sewon.assetlocation.application.AssetLocationService;
+import com.sewon.assetlocation.exception.LocationErrorCode;
 import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.assettype.application.AssetTypeService;
 import com.sewon.assettype.exception.AssetTypeErrorCode;
 import com.sewon.assettype.model.AssetType;
 import com.sewon.barcode.model.Barcode;
+import com.sewon.barcode.repository.BarcodeRepository;
 import com.sewon.common.exception.DomainException;
 import com.sewon.inbound.application.AssetInboundService;
 import com.sewon.inbound.constant.InboundType;
 import com.sewon.inbound.model.AssetInbound;
-import java.time.LocalDate;
+import com.sewon.outbound.application.AssetOutboundService;
+import com.sewon.outbound.constant.OutboundType;
+import com.sewon.outbound.model.AssetOutbound;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,47 +43,47 @@ public class AssetService {
     private final AssetRepository assetRepository;
     private final AssetSearchRepository assetSearchRepository;
     private final AccountService accountService;
-    private final AffiliationService affiliationService;
     private final AssetTypeService assetTypeService;
     private final AssetInboundService assetInboundService;
+    private final AssetOutboundService assetOutboundService;
+    private final AssetLocationService assetLocationService;
+    private final BarcodeRepository barcodeRepository;
 
 
     @Transactional
     public Asset registerAsset(AssetProperties properties, Long id) {
-        Affiliation affiliation = affiliationService.findAffiliationByDepartmentAndCorporation(
-            properties.getDepartment(),
-            properties.getCorporation());
-
-        AssetLocation assetLocation = affiliation.findLocation(properties.getLocation());
+        AssetLocation assetLocation = assetLocationService.findAssetLocationById(
+            properties.getLocationId());
 
         AssetType assetType = assetTypeService.findAssetByParentAndChildType
             (properties.getParentType(),
                 properties.getChildType());
 
         Account account = accountService.findAccountById(id);
-
-        Asset asset = assetRepository.save(properties.toAsset(assetType, account, assetLocation));
+        Asset asset = properties.toAsset(assetType, account, assetLocation);
+        Barcode.createBarcode(asset);
+        Asset assetPs = assetRepository.save(asset);
 
         assetInboundService.registerAssetInbound(
-            AssetInbound.of(InboundType.getByAssetStatus(asset.getAssetStatusValue()),
-                asset.getCreatedDate(), account, asset,
+            AssetInbound.of(InboundType.getByAssetStatus(assetPs.getAssetStatusValue()),
+                assetPs.getCreatedDate(), account, assetPs,
                 assetLocation));
-        Barcode.createBarcode(asset);
-        return asset;
+
+        return assetPs;
     }
 
     @Transactional
     public List<Asset> registerAssetList(List<AssetProperties> properties, Long id) {
         List<Asset> assets = new ArrayList<>();
 
-        Map<String, Affiliation> affiliationMap = cachingAffiliation(
-            affiliationService.findAllAffiliation());
+        Map<Long, AssetLocation> assetLocationMap = cachingAssetLocation(
+            assetLocationService.findAllAssetLocation());
 
         Map<String, AssetType> assetTypeMap =
             cachingAssetType(assetTypeService.findAll());
 
-        if (affiliationMap.isEmpty()) {
-            throw new DomainException(AffiliationErrorCode.AFFILIATION_NOT_FOUND);
+        if (assetLocationMap.isEmpty()) {
+            throw new DomainException(LocationErrorCode.LOCATION_NOT_FOUND);
         }
         if (assetTypeMap.isEmpty()) {
             throw new DomainException(AssetTypeErrorCode.ASSET_TYPE_NOT_FOUND);
@@ -88,30 +92,23 @@ public class AssetService {
         Account account = accountService.findAccountById(id);
         for (AssetProperties assetProperties : properties) {
 
-            Affiliation affiliation = affiliationMap.get(
-                assetProperties.getCorporation() + "-" + assetProperties.getDepartment());
-            AssetLocation assetLocation = affiliation.findLocation(assetProperties.getLocation());
+            AssetLocation assetLocation = assetLocationMap.get(assetProperties.getLocationId());
 
             AssetType assetType = assetTypeMap.get(
                 assetProperties.getParentType() + "-" + assetProperties.getChildType());
             Asset asset = assetProperties.toAsset(assetType, account, assetLocation);
             assets.add(asset);
+            Barcode.createBarcode(asset);
         }
         List<Asset> assetsPs = assetRepository.saveAll(assets);
-        assetsPs.forEach(asset -> {
-            assetInboundService.registerAssetInbound(
-                AssetInbound.of(InboundType.getByAssetStatus(asset.getAssetStatusValue()),
-                    asset.getCreatedDate(), account, asset,
-                    asset.getAssetLocation()));
-            Barcode.createBarcode(asset);
-        });
+        List<AssetInbound> assetInbounds = new ArrayList<>();
+        assetsPs.forEach(asset -> assetInbounds.add(
+            AssetInbound.of(InboundType.getByAssetStatus(asset.getAssetStatusValue()),
+                asset.getCreatedDate(), account, asset,
+                asset.getAssetLocation())
+        ));
+        assetInboundService.registerAllAssetInbound(assetInbounds);
         return assetsPs;
-    }
-
-    private Map<String, Affiliation> cachingAffiliation(List<Affiliation> affiliations) {
-        return affiliations.stream()
-            .collect(Collectors.toMap(a -> a.getCorporation() + "-" + a.getDepartment(),
-                Function.identity()));
     }
 
     private Map<String, AssetType> cachingAssetType(List<AssetType> assetTypes) {
@@ -121,8 +118,47 @@ public class AssetService {
                     Function.identity()));
     }
 
+    private Map<Long, AssetLocation> cachingAssetLocation(List<AssetLocation> locations) {
+        return locations.stream()
+            .collect(Collectors.toMap(AssetLocation::getId, Function.identity()));
+    }
+
+    @Transactional
+    public void updateAsset(AssetProperties properties, String barcode) {
+        Asset asset = assetRepository.findByBarcode(barcode)
+            .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND));
+        AssetLocation assetLocation = assetLocationService.findAssetLocationById(
+            properties.getLocationId());
+
+        AssetType assetType = assetTypeService.findAssetTypeByName(properties.getChildType());
+
+        assetRepository.save(properties.updateAsset(asset, assetLocation, assetType));
+    }
+
+    @Transactional
+    public void transferAsset(Long assetId, Long fromLocationId, Long toLocationId,
+        Long accountId) {
+        Asset asset = findAssetById(assetId);
+        AssetLocation fromLocation = assetLocationService.findAssetLocationById(fromLocationId);
+        if (asset.isEnableTransferLocation(fromLocation)) {
+            AssetLocation toLocation = assetLocationService.findAssetLocationById(toLocationId);
+            Account account = accountService.findAccountById(accountId);
+            assetInboundService.registerAssetInbound(
+                AssetInbound.of(InboundType.TRANSFER, now(), account, asset, toLocation)
+            );
+            assetOutboundService.registerAssetOutbound(
+                AssetOutbound.of(OutboundType.TRANSFER, now(), account, asset, fromLocation)
+            );
+            asset.setAssetLocation(toLocation);
+            return;
+        }
+        throw new DomainException(ASSET_NOT_FOUND);
+    }
+
+
     @Transactional
     public void deleteAssetById(Long id) {
+
         assetRepository.deleteById(id);
     }
 
@@ -131,63 +167,29 @@ public class AssetService {
             .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND));
     }
 
-    public Asset findAssetByBarcode(String value) {
-        return assetRepository.findByBarcode(value)
-            .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND));
-    }
-
-    public List<Asset> findAllAsset() {
-        return assetRepository.findAll();
-    }
-
-    public List<Asset> findAllAsset(int size) {
-        return assetRepository.findAll(size);
-    }
-
-    public List<Asset> findAllAssetByLocation(String location, int size) {
-        return assetRepository.findAllByLocation(location, size);
-    }
-
-    public List<Asset> findAllByLocationAndChildType(String location, String type, int size) {
-        return assetRepository.findAllByLocationAndChildType(location, type, size);
-    }
-
-    public List<Asset> findAllByLocationAndChildTypeBetween(String location, String type,
-        LocalDate after, LocalDate before, int size) {
-        return assetRepository.findAllByLocationAndChildTypeBetween(
-            location,
-            type,
-            after.atStartOfDay(),
-            before.atTime(23, 59, 59, 999_999),
-            size
+    public AssetResult findAssetResultById(Long id) {
+        return AssetResult.from(assetRepository.findById(id)
+            .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND))
         );
     }
 
-    public List<Asset> findAllByLocationAndParentType(String location, String type, int size) {
-        return assetRepository.findAllByLocationAndParentType(location, type, size);
-    }
-
-    public List<Asset> findAllByLocationAndParentTypeBetween(String location, String type,
-        LocalDate after, LocalDate before, int size) {
-        return assetRepository.findAllByLocationAndParentTypeBetween(
-            location,
-            type,
-            after.atStartOfDay(),
-            before.atTime(23, 59, 59, 999_999),
-            size
+    public AssetResult findAssetByBarcode(String value) {
+        return AssetResult.from(assetRepository.findByBarcode(value)
+            .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND))
         );
     }
 
-    public List<Asset> findAllBetween(LocalDate after, LocalDate before, int size) {
-        return assetRepository.findAllBetween(
-            after.atStartOfDay(),
-            before.atTime(23, 59, 59, 999_999),
-            size
-        );
+    public List<AssetResult> findAllAsset() {
+        return assetRepository.findAll()
+            .stream().map(AssetResult::from).toList();
     }
 
-    public List<Asset> findAllByCondition(AssetSearchProperties properties) {
+    public List<AssetResult> findAllByCondition(AssetSearchProperties properties) {
         return assetSearchRepository.searchAssets(properties);
+    }
+
+    public List<AssetResult> findAllRentalEnableAssetByCondition(AssetSearchProperties properties) {
+        return assetSearchRepository.searchRentalEnableAssets(properties);
     }
 
 

@@ -2,7 +2,7 @@ package com.sewon.asset.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sewon.asset.model.Asset;
+import com.sewon.asset.dto.AssetResult;
 import java.time.LocalDate;
 
 @JsonInclude(Include.NON_EMPTY)
@@ -25,22 +25,22 @@ public record AssetOneResponse(
 
 ) {
 
-    public static AssetOneResponse from(Asset asset) {
+    public static AssetOneResponse from(AssetResult asset) {
         return new AssetOneResponse(
-            asset.getId(),
-            asset.getBarcodeValue(),
-            asset.getCorporation(),
-            asset.getDepartment(),
-            asset.getLocation(),
-            asset.getDivision(),
-            asset.getParentCategory(),
-            asset.getChildCategory(),
-            asset.getStatus(),
-            asset.getManufacturer(),
-            asset.getModel(),
-            asset.getAcquisitionDate().toLocalDate(),
-            asset.getAcquisitionPrice(),
-            asset.getAccountName()
+            asset.id(),
+            asset.barcode(),
+            asset.corporation(),
+            asset.department(),
+            asset.location(),
+            asset.division(),
+            asset.parentCategory(),
+            asset.childCategory(),
+            asset.status(),
+            asset.manufacturer(),
+            asset.model(),
+            asset.acquisitionDate(),
+            asset.acquisitionPrice(),
+            asset.registerName()
         );
     }
 }

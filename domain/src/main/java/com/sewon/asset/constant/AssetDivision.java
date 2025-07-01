@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum AssetDivision {
 
     PURCHASE("구매자산", 0),
-    RENTAL("대여자산", 1);
+    RENTAL("이관자산", 1);
 
 
     private final String description;

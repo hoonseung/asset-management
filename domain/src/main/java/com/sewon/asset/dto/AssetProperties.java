@@ -12,9 +12,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public abstract class AssetProperties {
 
-    protected String corporation;
-    protected String department;
-    protected String location;
+    protected Long locationId;
     protected Integer division;
     protected String parentType;
     protected String childType;
@@ -27,4 +25,7 @@ public abstract class AssetProperties {
 
     public abstract Asset toAsset(AssetType assetType, Account account,
         AssetLocation assetLocation);
+
+    public abstract Asset updateAsset(Asset asset, AssetLocation assetLocation,
+        AssetType assetType);
 }

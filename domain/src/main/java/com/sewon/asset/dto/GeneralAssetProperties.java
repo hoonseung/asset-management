@@ -12,11 +12,11 @@ import lombok.Getter;
 @Getter
 public class GeneralAssetProperties extends AssetProperties {
 
-    public GeneralAssetProperties(String corporation, String department, String location,
+    public GeneralAssetProperties(Long locationId,
         Integer division, String parentType, String childType, Integer assetStatus,
         String manufacturer,
         String model, LocalDateTime acquisitionDate, Integer acquisitionPrice) {
-        super(corporation, department, location, division, parentType, childType, assetStatus,
+        super(locationId, division, parentType, childType, assetStatus,
             manufacturer, model, acquisitionDate, acquisitionPrice);
     }
 
@@ -35,16 +35,31 @@ public class GeneralAssetProperties extends AssetProperties {
         );
     }
 
-    public static GeneralAssetProperties of(String corporation, String department, String location,
+    public static GeneralAssetProperties of(Long locationId,
         Integer division, String parentType, String childType,
         Integer assetStatus,
         String manufacturer, String model, LocalDateTime acquisitionDate,
         Integer acquisitionPrice) {
         return new GeneralAssetProperties(
-            corporation, department, location, division, parentType,
+            locationId, division, parentType,
             childType, assetStatus, manufacturer, model, acquisitionDate,
             acquisitionPrice);
     }
 
-
+    @Override
+    public Asset updateAsset(Asset asset, AssetLocation assetLocation, AssetType assetType) {
+        if (assetLocation != null) {
+            asset.setAssetLocation(assetLocation);
+        }
+        asset.setAssetDivision(AssetDivision.fromValue(division));
+        if (assetType != null) {
+            asset.setAssetType(assetType);
+        }
+        asset.setAssetStatus(AssetStatus.fromValue(assetStatus));
+        asset.setManufacturer(manufacturer);
+        asset.setModel(model);
+        asset.setAcquisitionDate(acquisitionDate);
+        asset.setAcquisitionPrice(acquisitionPrice);
+        return asset;
+    }
 }

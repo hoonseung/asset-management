@@ -5,7 +5,7 @@ import com.sewon.asset.dto.ElectronicAssetProperties;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record ElectronicAssetRegistrationRequest(
+public record ElectronicAssetUpdateRequest(
     Long locationId,
     Integer division,
     String parentType,

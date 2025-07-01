@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 public enum AssetErrorCode implements ErrorCode {
 
     ASSET_NOT_FOUND("ASSET_001", "자산을 찾을 수 없습니다."),
+    ASSET_TRANSFER_ERROR("ASSET_002", "자산을 이관할 수 없습니다."),
 
     ;
 

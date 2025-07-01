@@ -4,7 +4,7 @@ import com.sewon.asset.dto.AssetProperties;
 import com.sewon.asset.dto.GeneralAssetProperties;
 import java.time.LocalDateTime;
 
-public record AssetRegistrationRequest(
+public record AssetUpdateRequest(
     Long locationId,
     Integer division,
     String parentType,
@@ -29,4 +29,6 @@ public record AssetRegistrationRequest(
             acquisitionPrice
         );
     }
+
+
 }

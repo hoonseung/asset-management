@@ -1,6 +1,7 @@
 package com.sewon.asset.model;
 
 import static jakarta.persistence.DiscriminatorType.STRING;
+import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static jakarta.persistence.InheritanceType.JOINED;
@@ -42,6 +43,7 @@ import org.hibernate.annotations.SQLDelete;
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
+@Setter
 @Inheritance(strategy = JOINED)
 @DiscriminatorColumn(name = "d_type", discriminatorType = STRING)
 @Table(name = "asset")
@@ -77,17 +79,16 @@ public class Asset extends BaseTime {
     @JoinColumn(name = "asset_type_id", nullable = false)
     private AssetType assetType;
 
-    @Setter
     @ManyToOne(targetEntity = Account.class, optional = false, fetch = LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
+
 
     @ManyToOne(targetEntity = AssetLocation.class, optional = false, fetch = LAZY)
     @JoinColumn(name = "asset_location_id", nullable = false)
     private AssetLocation assetLocation;
 
-    @Setter
-    @OneToOne(mappedBy = "asset", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "asset", cascade = CascadeType.ALL, fetch = EAGER)
     private Barcode barcode;
 
 
@@ -106,6 +107,23 @@ public class Asset extends BaseTime {
             account,
             assetLocation,
             null);
+    }
+
+    public static Asset of(Long id, AssetDivision assetDivision, AssetStatus assetStatus,
+        String manufacturer, String model, Integer acquisitionPrice, LocalDateTime acquisitionDate,
+        AssetType assetType, Account account, AssetLocation assetLocation, Barcode barcode) {
+        return new Asset(
+            id,
+            assetDivision,
+            assetStatus,
+            manufacturer,
+            model,
+            acquisitionPrice,
+            acquisitionDate,
+            assetType,
+            account,
+            assetLocation,
+            barcode);
     }
 
     public Long getAssetTypeId() {
@@ -154,5 +172,9 @@ public class Asset extends BaseTime {
 
     public int getAssetStatusValue() {
         return this.assetStatus.getValue();
+    }
+
+    public boolean isEnableTransferLocation(AssetLocation location) {
+        return getAssetLocation().getId().equals(location.getId());
     }
 }

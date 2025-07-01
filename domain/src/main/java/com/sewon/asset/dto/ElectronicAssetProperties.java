@@ -21,13 +21,13 @@ public class ElectronicAssetProperties extends AssetProperties {
     private final String gpu;
 
 
-    public ElectronicAssetProperties(String corporation, String department, String location,
+    public ElectronicAssetProperties(Long locationId,
         Integer division, String parentType, String childType, Integer assetStatus,
         String manufacturer,
         String model, LocalDateTime acquisitionDate, Integer acquisitionPrice, String cpu,
         Integer ram,
         BigDecimal storage, String gpu) {
-        super(corporation, department, location, division, parentType, childType, assetStatus,
+        super(locationId, division, parentType, childType, assetStatus,
             manufacturer, model, acquisitionDate, acquisitionPrice);
         this.cpu = cpu;
         this.ram = ram;
@@ -54,15 +54,32 @@ public class ElectronicAssetProperties extends AssetProperties {
         );
     }
 
-    public static ElectronicAssetProperties of(String corporation, String department,
-        String location, Integer division, String parentType, String childType,
+    public static ElectronicAssetProperties of(Long locationId, Integer division, String parentType,
+        String childType,
         Integer assetStatus, String manufacturer, String model, LocalDateTime acquisitionDate,
         Integer acquisitionPrice, String cpu, Integer ram, BigDecimal storage, String gpu) {
         return new ElectronicAssetProperties(
-            corporation, department, location, division, parentType, childType,
+            locationId, division, parentType, childType,
             assetStatus, manufacturer, model, acquisitionDate, acquisitionPrice,
             cpu, ram, storage, gpu);
     }
 
+    @Override
+    public Asset updateAsset(Asset asset, AssetLocation assetLocation, AssetType assetType) {
+        AssetLocation newAssetLocation = asset.getAssetLocation();
+        AssetType newAssetType = asset.getAssetType();
+        if (assetLocation != null) {
+            newAssetLocation = assetLocation;
+        }
+        asset.setAssetDivision(AssetDivision.fromValue(super.division));
+        if (assetType != null) {
+            newAssetType = assetType;
+        }
 
+        return ElectronicAsset.of(asset.getId(), AssetDivision.fromValue(super.division),
+            AssetStatus.fromValue(super.assetStatus), super.manufacturer, super.model,
+            super.acquisitionPrice, super.acquisitionDate, newAssetType,
+            asset.getAccount(), newAssetLocation, asset.getBarcode()
+        );
+    }
 }

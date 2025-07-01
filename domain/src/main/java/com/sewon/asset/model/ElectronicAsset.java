@@ -16,19 +16,21 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @NoArgsConstructor(access = PROTECTED)
 @Getter
+@Setter
 @DiscriminatorValue("ELECTRONIC")
 @Table(name = "electronic_asset")
 @Entity
 public class ElectronicAsset extends Asset {
 
-    @Column(name = "cpu", length = 50, nullable = false)
+    @Column(name = "cpu", length = 50)
     private String cpu;
 
-    @Column(name = "ram", columnDefinition = "SMALLINT", nullable = false)
+    @Column(name = "ram", columnDefinition = "SMALLINT")
     private Integer ram;
 
     @Column(precision = 6, scale = 3)
