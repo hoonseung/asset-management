@@ -1,13 +1,13 @@
 package com.sewon.assetlocation.response;
 
-import com.sewon.assetlocation.model.AssetLocation;
+import com.sewon.assetlocation.dto.AssetLocationResult;
 
 public record AssetLocationOneResponse(
     Long locationId,
     String location
 ) {
 
-    public static AssetLocationOneResponse from(AssetLocation assetLocation) {
-        return new AssetLocationOneResponse(assetLocation.getId(), assetLocation.getLocation());
+    public static AssetLocationOneResponse from(AssetLocationResult assetLocation) {
+        return new AssetLocationOneResponse(assetLocation.id(), assetLocation.location());
     }
 }

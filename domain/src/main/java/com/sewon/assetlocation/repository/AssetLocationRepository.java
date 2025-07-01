@@ -10,8 +10,6 @@ public interface AssetLocationRepository {
 
     Optional<AssetLocation> findById(Long id);
 
-    Optional<AssetLocation> findByLocation(String location);
-
     List<AssetLocation> findAll();
 
     List<AssetLocation> findAllByAffiliationId(Long id);

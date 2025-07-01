@@ -29,11 +29,6 @@ public class JpaAssetLocationRepository implements AssetLocationRepository {
     }
 
     @Override
-    public Optional<AssetLocation> findByLocation(String location) {
-        return assetLocationJpaRepository.findByLocation(location);
-    }
-
-    @Override
     public List<AssetLocation> findAll() {
         return assetLocationJpaRepository.findAll();
     }
