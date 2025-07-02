@@ -59,7 +59,7 @@ public class JpaAssetRentalRepository implements AssetRentalRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        assetRentalJpaRepository.deleteById(id);
+    public void deleteAllByIds(List<Long> ids) {
+        assetRentalJpaRepository.deleteAllByIdIn(ids);
     }
 }

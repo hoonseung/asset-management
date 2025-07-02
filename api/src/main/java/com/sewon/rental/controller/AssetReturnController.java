@@ -43,7 +43,7 @@ public class AssetReturnController {
         @RequestParam("affiliationId") Long affiliationId
     ) {
         RentalListResponse response = RentalListResponse.from(
-            assetRentalService.findAllAssetReturnRequestingByAffiliation(affiliationId));
+            assetRentalService.findAllAssetReturnRequestingMyAffiliation(affiliationId));
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
@@ -52,7 +52,7 @@ public class AssetReturnController {
         @RequestParam("affiliationId") Long affiliationId
     ) {
         RentalListResponse response = RentalListResponse.from(
-            assetRentalService.findAllAssetReturnRequestingByAssetAffiliation(affiliationId));
+            assetRentalService.findAllAssetReturnRequestingByOtherAffiliation(affiliationId));
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 

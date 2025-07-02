@@ -25,6 +25,6 @@ public interface AssetRentalRepository {
 
     List<AssetRental> findAllByIds(List<Long> ids);
 
-    void deleteById(Long id);
+    void deleteAllByIds(List<Long> ids);
 
 }

@@ -56,11 +56,13 @@ public class AssetRental extends BaseTime {
     @JoinColumn(name = "asset_location_id", nullable = false)
     private AssetLocation assetLocation;
 
-    @ManyToOne(targetEntity = AssetInbound.class, fetch = LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = AssetInbound.class, fetch = LAZY, cascade = {CascadeType.PERSIST,
+        CascadeType.MERGE})
     @JoinColumn(name = "asset_inbound_id")
     private AssetInbound assetInbound;
 
-    @ManyToOne(targetEntity = AssetOutbound.class, fetch = LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = AssetOutbound.class, fetch = LAZY, cascade = {CascadeType.PERSIST,
+        CascadeType.MERGE})
     @JoinColumn(name = "asset_outbound_id")
     private AssetOutbound assetOutbound;
 

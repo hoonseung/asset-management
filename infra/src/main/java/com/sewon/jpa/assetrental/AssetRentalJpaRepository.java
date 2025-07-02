@@ -43,4 +43,5 @@ public interface AssetRentalJpaRepository extends JpaRepository<AssetRental, Lon
             "  select ar.asset.id from AssetRental ar where ar.rentalStatus in :statuses)")
     Long getRentableByAffiliationId(Long affiliationId, List<RentalStatus> statuses);
 
+    void deleteAllByIdIn(List<Long> ids);
 }

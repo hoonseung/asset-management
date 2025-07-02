@@ -3,7 +3,6 @@ package com.sewon.rental.application;
 import static com.sewon.rental.constant.RentalStatus.RENT;
 import static com.sewon.rental.constant.RentalStatus.REQUEST_RENTAL;
 import static com.sewon.rental.constant.RentalStatus.REQUEST_RETURN;
-import static com.sewon.rental.constant.RentalStatus.RETURN;
 import static com.sewon.rental.exception.RentalErrorCode.RENTAL_NOT_FOUND;
 import static java.time.LocalDateTime.now;
 
@@ -79,8 +78,8 @@ public class AssetRentalService {
 
 
     @Transactional
-    public void deleteAssetRentalById(Long id) {
-        assetRentalRepository.deleteById(id);
+    public void deleteAllAssetRentalById(List<Long> ids) {
+        assetRentalRepository.deleteAllByIds(ids);
     }
 
     public AssetRental findAssetRentalById(Long id) {
@@ -92,7 +91,7 @@ public class AssetRentalService {
         return assetRentalRepository.findAll();
     }
 
-
+    // 다른 부서에서 대여 요청온 자산
     public List<AssetRentalResult> findAllRequestingAssetRentalByAssetAffiliation(
         Long affiliationId) {
         return assetRentalRepository.findAllByRentalStatusAndAssetAffiliation(
@@ -101,6 +100,7 @@ public class AssetRentalService {
             .toList();
     }
 
+    // 우리 부서가 대여 요청한 자산
     public List<AssetRentalResult> findAllRequestingAssetRentalMyAffiliation(Long affiliationId) {
         return assetRentalRepository.findAllByRentalStatusAndMyAffiliation(
                 REQUEST_RENTAL, affiliationId).stream()
@@ -108,6 +108,7 @@ public class AssetRentalService {
             .toList();
     }
 
+    // 우리 부서에서 대여 중인 자산
     @Transactional
     public List<AssetRentalResult> findAllAssetRentedMyAffiliation(Long affiliationId) {
         List<AssetRental> assetRentals = assetRentalRepository.findAllByRentalStatusAndMyAffiliation(
@@ -120,17 +121,19 @@ public class AssetRentalService {
             .toList();
     }
 
-    public List<AssetRentalResult> findAllAssetReturnRequestingByAffiliation(Long affiliationId) {
-        return assetRentalRepository.findAllByRentalStatusAndAssetAffiliation(
+    // 우리 부서에서 반납 요청 중인 자산
+    public List<AssetRentalResult> findAllAssetReturnRequestingMyAffiliation(Long affiliationId) {
+        return assetRentalRepository.findAllByRentalStatusAndMyAffiliation(
                 REQUEST_RETURN, affiliationId).stream()
             .map(AssetRentalResult::from)
             .toList();
     }
 
-    public List<AssetRentalResult> findAllAssetReturnRequestingByAssetAffiliation(
+    // 다른 부서에서 반납 요청온 자산
+    public List<AssetRentalResult> findAllAssetReturnRequestingByOtherAffiliation(
         Long affiliationId) {
         return assetRentalRepository.findAllByRentalStatusAndAssetAffiliation(
-                RETURN, affiliationId).stream()
+                REQUEST_RETURN, affiliationId).stream()
             .map(AssetRentalResult::from)
             .toList();
     }
