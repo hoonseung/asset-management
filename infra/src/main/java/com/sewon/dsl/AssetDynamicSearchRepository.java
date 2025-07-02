@@ -139,7 +139,7 @@ public class AssetDynamicSearchRepository implements AssetSearchRepository {
     private BooleanExpression enableRental(QAssetRental assetRental) {
         return assetRental.id.isNull()
             .or(assetRental.rentalStatus.notIn(RentalStatus.REQUEST_RENTAL, RentalStatus.RENT,
-                RentalStatus.REQUEST_RETURN));
+                RentalStatus.REQUEST_RETURN, RentalStatus.EXPIRE));
     }
 
     public AssetResult from(AssetQueryResponseDto dto) {

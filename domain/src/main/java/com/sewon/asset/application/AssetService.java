@@ -157,9 +157,8 @@ public class AssetService {
 
 
     @Transactional
-    public void deleteAssetById(Long id) {
-
-        assetRepository.deleteById(id);
+    public void deleteAllAssetById(List<Long> ids) {
+        assetRepository.deleteAllById(ids);
     }
 
     public Asset findAssetById(Long id) {

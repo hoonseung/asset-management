@@ -2,6 +2,7 @@ package com.sewon.asset.controller;
 
 import com.sewon.asset.application.AssetService;
 import com.sewon.asset.model.Asset;
+import com.sewon.asset.request.AssetDeleteRequest;
 import com.sewon.asset.request.AssetListRegistrationRequest;
 import com.sewon.asset.request.AssetRegistrationRequest;
 import com.sewon.asset.request.AssetSearchRequest;
@@ -139,10 +140,10 @@ public class AssetController {
         );
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteAssetById(
-        @PathVariable("id") Long id) {
-        assetService.deleteAssetById(id);
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteAllAssetById(
+        @RequestBody AssetDeleteRequest request) {
+        assetService.deleteAllAssetById(request.ids());
         return ResponseEntity.ok(ApiResponse.ok());
     }
 

@@ -10,8 +10,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface AssetJpaRepository extends JpaRepository<Asset, Long> {
 
-    @Query("select a from Asset a where a.assetLocation.location = :location")
-    List<Asset> findAllByLocation(@Param("location") String location, Pageable pageable);
+    @Query("select a from Asset a where a.assetLocation.id = :locationId")
+    List<Asset> findAllByAssetLocationId(@Param("locationId") Long locationId);
 
     @Query("select a from Asset a where a.assetLocation.location = :location and a.assetType.name = :type")
     List<Asset> findAllByLocationAndChildType
@@ -39,4 +39,9 @@ public interface AssetJpaRepository extends JpaRepository<Asset, Long> {
 
     List<Asset> findAllByCreatedDateBetween(LocalDateTime createdDateAfter,
         LocalDateTime createdDateBefore, Pageable pageable);
+
+    @Query("select count(a) from Asset a where a.assetLocation.affiliation.id = :affiliationId")
+    Long getCountByAffiliationId(@Param("affiliationId") Long affiliationId);
+
+    void deleteAllByIdIn(List<Long> ids);
 }

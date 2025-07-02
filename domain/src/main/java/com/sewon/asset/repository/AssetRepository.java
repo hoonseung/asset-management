@@ -19,7 +19,7 @@ public interface AssetRepository {
 
     List<Asset> findAll(int size);
 
-    List<Asset> findAllByLocation(String location, int size);
+    List<Asset> findAllByLocationId(Long locationId);
 
     List<Asset> findAllByLocationAndChildType(String location, String childType,
         int size);
@@ -36,5 +36,7 @@ public interface AssetRepository {
 
     List<Asset> findAllBetween(LocalDateTime after, LocalDateTime before, int size);
 
-    void deleteById(Long id);
+    void deleteAllById(List<Long> ids);
+
+
 }

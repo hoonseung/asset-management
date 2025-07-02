@@ -50,8 +50,8 @@ public class JpaAssetRepository implements AssetRepository {
     }
 
     @Override
-    public List<Asset> findAllByLocation(String location, int size) {
-        return assetJpaRepository.findAllByLocation(location, PageRequest.of(0, size));
+    public List<Asset> findAllByLocationId(Long locationId) {
+        return assetJpaRepository.findAllByAssetLocationId(locationId);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class JpaAssetRepository implements AssetRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        assetJpaRepository.deleteById(id);
+    public void deleteAllById(List<Long> ids) {
+        assetJpaRepository.deleteAllByIdIn(ids);
     }
 }
