@@ -13,10 +13,10 @@ import lombok.Getter;
 public class GeneralAssetProperties extends AssetProperties {
 
     public GeneralAssetProperties(Long locationId,
-        Integer division, String parentType, String childType, Integer assetStatus,
+        Integer division, Long parentTypeId, Long childTypeId, Integer assetStatus,
         String manufacturer,
         String model, LocalDateTime acquisitionDate, Integer acquisitionPrice) {
-        super(locationId, division, parentType, childType, assetStatus,
+        super(locationId, division, parentTypeId, childTypeId, assetStatus,
             manufacturer, model, acquisitionDate, acquisitionPrice);
     }
 
@@ -36,13 +36,13 @@ public class GeneralAssetProperties extends AssetProperties {
     }
 
     public static GeneralAssetProperties of(Long locationId,
-        Integer division, String parentType, String childType,
+        Integer division, Long parentTypeId, Long childTypeId,
         Integer assetStatus,
         String manufacturer, String model, LocalDateTime acquisitionDate,
         Integer acquisitionPrice) {
         return new GeneralAssetProperties(
-            locationId, division, parentType,
-            childType, assetStatus, manufacturer, model, acquisitionDate,
+            locationId, division, parentTypeId,
+            childTypeId, assetStatus, manufacturer, model, acquisitionDate,
             acquisitionPrice);
     }
 

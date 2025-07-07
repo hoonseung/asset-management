@@ -159,11 +159,11 @@ public class Asset extends BaseTime {
     }
 
     public String getParentCategory() {
-        return this.assetType.getParentCategoryName();
+        return this.assetType.getParentCategory().getName();
     }
 
     public String getChildCategory() {
-        return this.assetType.getChildCategoryName();
+        return this.assetType.getChildCategory().getName();
     }
 
     public String getAccountName() {

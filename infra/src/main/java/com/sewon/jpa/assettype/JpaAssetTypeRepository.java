@@ -24,8 +24,8 @@ public class JpaAssetTypeRepository implements AssetTypeRepository {
     }
 
     @Override
-    public Optional<AssetType> findByParentAndChildType(String parentType, String childType) {
-        return assetTypeJpaRepository.findByNameAndAssetTypeName(childType, parentType);
+    public Optional<AssetType> findByParentAndChildType(Long parentTypeId, Long childTypeId) {
+        return assetTypeJpaRepository.findByIdAndAssetTypeId(childTypeId, parentTypeId);
     }
 
     @Override

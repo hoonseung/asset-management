@@ -18,7 +18,6 @@ import com.sewon.assettype.application.AssetTypeService;
 import com.sewon.assettype.exception.AssetTypeErrorCode;
 import com.sewon.assettype.model.AssetType;
 import com.sewon.barcode.model.Barcode;
-import com.sewon.barcode.repository.BarcodeRepository;
 import com.sewon.common.exception.DomainException;
 import com.sewon.inbound.application.AssetInboundService;
 import com.sewon.inbound.constant.InboundType;
@@ -47,7 +46,6 @@ public class AssetService {
     private final AssetInboundService assetInboundService;
     private final AssetOutboundService assetOutboundService;
     private final AssetLocationService assetLocationService;
-    private final BarcodeRepository barcodeRepository;
 
 
     @Transactional
@@ -56,8 +54,8 @@ public class AssetService {
             properties.getLocationId());
 
         AssetType assetType = assetTypeService.findAssetByParentAndChildType
-            (properties.getParentType(),
-                properties.getChildType());
+            (properties.getParentTypeId(),
+                properties.getChildTypeId());
 
         Account account = accountService.findAccountById(id);
         Asset asset = properties.toAsset(assetType, account, assetLocation);
@@ -95,7 +93,7 @@ public class AssetService {
             AssetLocation assetLocation = assetLocationMap.get(assetProperties.getLocationId());
 
             AssetType assetType = assetTypeMap.get(
-                assetProperties.getParentType() + "-" + assetProperties.getChildType());
+                assetProperties.getParentTypeId() + "-" + assetProperties.getChildTypeId());
             Asset asset = assetProperties.toAsset(assetType, account, assetLocation);
             assets.add(asset);
             Barcode.createBarcode(asset);
@@ -114,7 +112,8 @@ public class AssetService {
     private Map<String, AssetType> cachingAssetType(List<AssetType> assetTypes) {
         return assetTypes.stream()
             .collect(
-                Collectors.toMap(a -> a.getParentCategoryName() + "-" + a.getChildCategoryName(),
+                Collectors.toMap(
+                    a -> a.getParentCategory().getId() + "-" + a.getChildCategory().getId(),
                     Function.identity()));
     }
 
@@ -130,7 +129,7 @@ public class AssetService {
         AssetLocation assetLocation = assetLocationService.findAssetLocationById(
             properties.getLocationId());
 
-        AssetType assetType = assetTypeService.findAssetTypeByName(properties.getChildType());
+        AssetType assetType = assetTypeService.findAssetTypeById(properties.getChildTypeId());
 
         assetRepository.save(properties.updateAsset(asset, assetLocation, assetType));
     }

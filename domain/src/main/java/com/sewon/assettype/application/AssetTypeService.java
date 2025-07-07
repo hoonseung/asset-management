@@ -59,8 +59,8 @@ public class AssetTypeService {
             .orElseThrow(() -> new DomainException(ASSET_TYPE_NOT_FOUND));
     }
 
-    public AssetType findAssetByParentAndChildType(String parentType, String childType) {
-        return assetTypeRepository.findByParentAndChildType(parentType, childType)
+    public AssetType findAssetByParentAndChildType(Long parentTypeId, Long childTypeId) {
+        return assetTypeRepository.findByParentAndChildType(parentTypeId, childTypeId)
             .orElseThrow(() -> new DomainException(ASSET_TYPE_NOT_FOUND));
     }
 

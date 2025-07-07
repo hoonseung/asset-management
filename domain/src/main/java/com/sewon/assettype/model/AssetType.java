@@ -66,12 +66,12 @@ public class AssetType extends BaseTime {
         this.nationType = nationType;
     }
 
-    public String getParentCategoryName() {
-        return Objects.isNull(this.assetType) ? this.name : this.assetType.getName();
+    public AssetType getParentCategory() {
+        return Objects.isNull(this.assetType) ? this : this.assetType;
     }
 
-    public String getChildCategoryName() {
-        return Objects.nonNull(this.assetType) ? this.name : "";
+    public AssetType getChildCategory() {
+        return Objects.nonNull(this.assetType) ? this : getParentCategory();
     }
 
     public static AssetType of(String name, AssetType assetType, NationType nationType) {

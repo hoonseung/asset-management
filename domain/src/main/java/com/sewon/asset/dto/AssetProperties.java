@@ -14,8 +14,8 @@ public abstract class AssetProperties {
 
     protected Long locationId;
     protected Integer division;
-    protected String parentType;
-    protected String childType;
+    protected Long parentTypeId;
+    protected Long childTypeId;
     protected Integer assetStatus;
     protected String manufacturer;
     protected String model;

@@ -10,7 +10,7 @@ public interface AssetTypeRepository {
 
     Optional<AssetType> findById(Long id);
 
-    Optional<AssetType> findByParentAndChildType(String parent, String child);
+    Optional<AssetType> findByParentAndChildType(Long parentId, Long childId);
 
     Optional<AssetType> findByName(String name);
 

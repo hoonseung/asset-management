@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface AssetTypeJpaRepository extends JpaRepository<AssetType, Long> {
 
-    Optional<AssetType> findByNameAndAssetTypeName(String childType, String parentType);
+    Optional<AssetType> findByIdAndAssetTypeId(Long childType, Long parentType);
 
     Optional<AssetType> findByName(String name);
 

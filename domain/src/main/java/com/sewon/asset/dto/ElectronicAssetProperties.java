@@ -22,12 +22,12 @@ public class ElectronicAssetProperties extends AssetProperties {
 
 
     public ElectronicAssetProperties(Long locationId,
-        Integer division, String parentType, String childType, Integer assetStatus,
+        Integer division, Long parentTypeId, Long childTypeId, Integer assetStatus,
         String manufacturer,
         String model, LocalDateTime acquisitionDate, Integer acquisitionPrice, String cpu,
         Integer ram,
         BigDecimal storage, String gpu) {
-        super(locationId, division, parentType, childType, assetStatus,
+        super(locationId, division, parentTypeId, childTypeId, assetStatus,
             manufacturer, model, acquisitionDate, acquisitionPrice);
         this.cpu = cpu;
         this.ram = ram;
@@ -54,12 +54,12 @@ public class ElectronicAssetProperties extends AssetProperties {
         );
     }
 
-    public static ElectronicAssetProperties of(Long locationId, Integer division, String parentType,
-        String childType,
+    public static ElectronicAssetProperties of(Long locationId, Integer division, Long parentTypeId,
+        Long childTypeId,
         Integer assetStatus, String manufacturer, String model, LocalDateTime acquisitionDate,
         Integer acquisitionPrice, String cpu, Integer ram, BigDecimal storage, String gpu) {
         return new ElectronicAssetProperties(
-            locationId, division, parentType, childType,
+            locationId, division, parentTypeId, childTypeId,
             assetStatus, manufacturer, model, acquisitionDate, acquisitionPrice,
             cpu, ram, storage, gpu);
     }

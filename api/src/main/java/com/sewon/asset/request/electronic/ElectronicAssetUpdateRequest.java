@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 public record ElectronicAssetUpdateRequest(
     Long locationId,
     Integer division,
-    String parentType,
-    String childType,
+    Long parentTypeId,
+    Long childTypeId,
     Integer status,
     String manufacturer,
     String model,
@@ -26,8 +26,8 @@ public record ElectronicAssetUpdateRequest(
         return ElectronicAssetProperties.of(
             locationId,
             division,
-            parentType,
-            childType,
+            parentTypeId,
+            childTypeId,
             status,
             manufacturer,
             model,
