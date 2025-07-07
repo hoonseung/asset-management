@@ -24,9 +24,9 @@ public class JpaAffiliationRepository implements AffiliationRepository {
     }
 
     @Override
-    public Optional<Affiliation> findByDepartmentAndCorporation(String department,
-        String corporation) {
-        return affiliationJpaRepository.findByDepartmentAndCorporationName(department, corporation);
+    public Optional<Affiliation> findByIdAndCorporation(Long id,
+        Long corporationId) {
+        return affiliationJpaRepository.findByIdAndCorporationId(id, corporationId);
     }
 
     @Override

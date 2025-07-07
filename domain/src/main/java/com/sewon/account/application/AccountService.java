@@ -28,10 +28,10 @@ public class AccountService {
     private final AffiliationService affiliationService;
 
     @Transactional
-    public void registerAccount(Account account, String department, String corporation) {
+    public void registerAccount(Account account, Long id, Long corporationId) {
         if (accountRepository.findByUsername(account.getUsername()).isEmpty()) {
-            Affiliation affiliation = affiliationService.findAffiliationByDepartmentAndCorporation(
-                department, corporation);
+            Affiliation affiliation = affiliationService.findAffiliationByIdAndCorporation(
+                id, corporationId);
             account.setAffiliation(affiliation);
             account.passwordEncrypting(PasswordHasher.hash(account.getPassword()));
             accountRepository.save(account);
@@ -81,7 +81,8 @@ public class AccountService {
 
     public boolean isEnableRefreshToken(String accessToken, String refreshToken, Long id,
         Duration accessExpire) {
-        if (jwtBlackListService.isBlacklistToken(refreshToken, id, "refresh")) {
+        if (StringUtils.hasText(refreshToken) &&
+            jwtBlackListService.isBlacklistToken(refreshToken, id, "refresh")) {
             return false;
         }
         if (StringUtils.hasText(accessToken)) {

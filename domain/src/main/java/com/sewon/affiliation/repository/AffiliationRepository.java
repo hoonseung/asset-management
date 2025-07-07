@@ -10,7 +10,7 @@ public interface AffiliationRepository {
 
     Optional<Affiliation> findById(Long id);
 
-    Optional<Affiliation> findByDepartmentAndCorporation(String department, String corporation);
+    Optional<Affiliation> findByIdAndCorporation(Long id, Long corporationId);
 
     List<Affiliation> findAllByCorporationId(Long corporationId);
 

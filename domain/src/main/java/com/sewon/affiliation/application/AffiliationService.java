@@ -58,9 +58,9 @@ public class AffiliationService {
             .orElseThrow(() -> new DomainException(AFFILIATION_NOT_FOUND));
     }
 
-    public Affiliation findAffiliationByDepartmentAndCorporation(String department,
-        String corporation) {
-        return affiliationRepository.findByDepartmentAndCorporation(department, corporation)
+    public Affiliation findAffiliationByIdAndCorporation(Long id,
+        Long corporationId) {
+        return affiliationRepository.findByIdAndCorporation(id, corporationId)
             .orElseThrow(() -> new DomainException(AFFILIATION_NOT_FOUND));
     }
 

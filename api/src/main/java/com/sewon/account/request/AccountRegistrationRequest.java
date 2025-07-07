@@ -6,8 +6,8 @@ public record AccountRegistrationRequest(
     String username,
     String password,
     String name,
-    String corporation,
-    String department,
+    Long corporationId,
+    Long affiliationId,
     Integer role
 ) {
 

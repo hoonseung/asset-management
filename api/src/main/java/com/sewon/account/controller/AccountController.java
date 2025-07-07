@@ -41,8 +41,8 @@ public class AccountController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Void>> registerAccount(
         @RequestBody AccountRegistrationRequest request) {
-        accountService.registerAccount(request.toAccount(), request.department(),
-            request.corporation());
+        accountService.registerAccount(request.toAccount(), request.affiliationId(),
+            request.corporationId());
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
@@ -93,11 +93,11 @@ public class AccountController {
             headerAccessToken.isBlank() ? "" : headerAccessToken;
 
         try {
-            if (accountService
-                .isEnableRefreshToken(accessHeaderToken, refreshHeaderToken,
-                    jwtTokenHandler.getId(refreshHeaderToken),
-                    jwtTokenHandler.getAccessToken(accessHeaderToken).expiration()) &&
-                jwtTokenHandler.isValidRefreshToken(refreshHeaderToken)
+            if (jwtTokenHandler.isValidRefreshToken(refreshHeaderToken) &&
+                accountService
+                    .isEnableRefreshToken(accessHeaderToken, refreshHeaderToken,
+                        jwtTokenHandler.getId(refreshHeaderToken),
+                        jwtTokenHandler.getAccessToken(accessHeaderToken).expiration())
             ) {
 
                 Account account = accountService.findAccountById(jwtTokenHandler.getId(
