@@ -201,9 +201,11 @@ create index idx_affiliation_corporation_id
     on affiliation (corporation_id) where deleted_at is null;
 create index idx_affiliation_department
     on affiliation (department) where deleted_at is null;
--- Add unique key constraints
-alter table if exists affiliation
-    add constraint uk_affiliation_corporation_id_department unique (corporation_id, department);
+create index idx_id_corporation_id
+    on affiliation (id, corporation_id) where deleted_at is null;
+-- Add unique constraints
+create unique index uk_affiliation_corporation_id_department
+    on affiliation (corporation_id, department) where deleted_at is null;
 
 
 -- Corporation
@@ -275,10 +277,9 @@ alter table if exists asset_location
 -- Add indexes
 create index idx_asset_location_affiliation_id
     on asset_location (affiliation_id) where deleted_at is null;
--- Add unique key constraints
-alter table asset_location
-    add constraint uk_affiliation_id_location
-        unique (affiliation_id, location);
+-- Add unique constraints
+create unique index uk_affiliation_id_location
+    on asset_location (affiliation_id, location) where deleted_at is null;
 
 
 -- AssetOutbound
@@ -352,6 +353,11 @@ create index idx_asset_type_asset_type_id
     on asset_type (asset_type_id) where deleted_at is null;
 create index idx_asset_type_name
     on asset_type (name) where deleted_at is null;
+create index idx_id_asset_type_id
+    on asset_type (id, asset_type_id) where deleted_at is null;
+-- Add unique constraints
+create unique index uk_id_asset_type_id
+    on asset_type (id, asset_type_id) where deleted_at is null;
 
 
 -- Barcode
