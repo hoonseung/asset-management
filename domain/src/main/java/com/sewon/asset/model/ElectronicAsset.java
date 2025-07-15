@@ -8,6 +8,7 @@ import com.sewon.asset.constant.AssetDivision;
 import com.sewon.asset.constant.AssetStatus;
 import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.assettype.model.AssetType;
+import com.sewon.barcode.model.Barcode;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -40,12 +41,12 @@ public class ElectronicAsset extends Asset {
     private String gpu;
 
 
-    public ElectronicAsset(AssetDivision assetDivision, AssetStatus assetStatus,
+    public ElectronicAsset(Long id, AssetDivision assetDivision, AssetStatus assetStatus,
         String manufacturer, String model, Integer acquisitionPrice, LocalDateTime acquisitionDate,
-        AssetType assetType, Account account, AssetLocation assetLocation,
+        AssetType assetType, Account account, AssetLocation assetLocation, Barcode barcode,
         String cpu, Integer ram, BigDecimal storage, String gpu) {
-        super(null, assetDivision, assetStatus, manufacturer, model, acquisitionPrice,
-            acquisitionDate, assetType, account, assetLocation, null);
+        super(id, assetDivision, assetStatus, manufacturer, model, acquisitionPrice,
+            acquisitionDate, assetType, account, assetLocation, barcode);
         this.cpu = cpu;
         this.ram = ram;
         this.storage = storage;
@@ -57,6 +58,7 @@ public class ElectronicAsset extends Asset {
         AssetType assetType, Account account, AssetLocation assetLocation,
         String cpu, Integer ram, BigDecimal storage, String gpu) {
         return new ElectronicAsset(
+            null,
             assetDivision,
             assetStatus,
             manufacturer,
@@ -66,6 +68,7 @@ public class ElectronicAsset extends Asset {
             assetType,
             account,
             assetLocation,
+            null,
             cpu, ram, storage, gpu);
     }
 }

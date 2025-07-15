@@ -11,21 +11,21 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class RedisJwtRepository implements TokenRepository {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> strRedisTemplate;
 
 
     @Override
     public void save(String key, String value, Duration ttl) {
-        redisTemplate.opsForValue().set(key, value, ttl);
+        strRedisTemplate.opsForValue().set(key, value, ttl);
     }
 
     @Override
     public String get(String key) {
-        return redisTemplate.opsForValue().get(key);
+        return strRedisTemplate.opsForValue().get(key);
     }
 
     @Override
     public Duration getExpiration(String key) {
-        return Duration.ofMinutes(redisTemplate.getExpire(key, TimeUnit.MINUTES));
+        return Duration.ofMinutes(strRedisTemplate.getExpire(key, TimeUnit.MINUTES));
     }
 }

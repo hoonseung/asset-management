@@ -1,4 +1,4 @@
-package com.sewon.asset.dto;
+package com.sewon.asset.dto.properties;
 
 import com.sewon.account.model.Account;
 import com.sewon.asset.constant.AssetDivision;
@@ -76,10 +76,9 @@ public class ElectronicAssetProperties extends AssetProperties {
             newAssetType = assetType;
         }
 
-        return ElectronicAsset.of(asset.getId(), AssetDivision.fromValue(super.division),
+        return new ElectronicAsset(asset.getId(), AssetDivision.fromValue(super.division),
             AssetStatus.fromValue(super.assetStatus), super.manufacturer, super.model,
             super.acquisitionPrice, super.acquisitionDate, newAssetType,
-            asset.getAccount(), newAssetLocation, asset.getBarcode()
-        );
+            asset.getAccount(), newAssetLocation, asset.getBarcode(), cpu, ram, storage, gpu);
     }
 }

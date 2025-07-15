@@ -1,7 +1,7 @@
 package com.sewon.asset.request;
 
-import com.sewon.asset.dto.AssetProperties;
-import com.sewon.asset.dto.GeneralAssetProperties;
+import com.sewon.asset.dto.properties.AssetProperties;
+import com.sewon.asset.dto.properties.GeneralAssetProperties;
 import java.time.LocalDateTime;
 
 public record AssetRegistrationRequest(

@@ -1,4 +1,4 @@
-package com.sewon.asset.dto;
+package com.sewon.asset.dto.properties;
 
 import com.sewon.account.model.Account;
 import com.sewon.asset.constant.AssetDivision;

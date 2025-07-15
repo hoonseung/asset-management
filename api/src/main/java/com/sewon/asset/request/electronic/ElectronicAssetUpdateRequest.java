@@ -1,7 +1,7 @@
 package com.sewon.asset.request.electronic;
 
-import com.sewon.asset.dto.AssetProperties;
-import com.sewon.asset.dto.ElectronicAssetProperties;
+import com.sewon.asset.dto.properties.AssetProperties;
+import com.sewon.asset.dto.properties.ElectronicAssetProperties;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

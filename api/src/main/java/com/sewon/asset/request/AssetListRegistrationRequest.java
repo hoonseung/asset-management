@@ -1,7 +1,7 @@
 package com.sewon.asset.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sewon.asset.dto.AssetProperties;
+import com.sewon.asset.dto.properties.AssetProperties;
 import java.util.List;
 
 public record AssetListRegistrationRequest(
