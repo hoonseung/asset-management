@@ -3,6 +3,7 @@ package com.sewon.rental.controller;
 import com.sewon.common.response.ApiResponse;
 import com.sewon.rental.application.AssetRentalService;
 import com.sewon.rental.request.ReturnApproveRequest;
+import com.sewon.rental.request.ReturnCancelRequest;
 import com.sewon.rental.request.ReturnRequest;
 import com.sewon.rental.response.RentalListResponse;
 import jakarta.validation.Valid;
@@ -54,6 +55,20 @@ public class AssetReturnController {
         RentalListResponse response = RentalListResponse.from(
             assetRentalService.findAllAssetReturnRequestingByOtherAffiliation(affiliationId));
         return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @PostMapping("/request/cancel")
+    public ResponseEntity<ApiResponse<Void>> deleteAllAssetRentalById(
+        @RequestBody ReturnCancelRequest request) {
+        assetRentalService.returnRequestCancel(request.ids());
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+    @PostMapping("/request/reject")
+    public ResponseEntity<ApiResponse<Void>> rejectAllAssetRentalById(
+        @RequestBody ReturnCancelRequest request) {
+        assetRentalService.rejectReturnRequest(request.ids());
+        return ResponseEntity.ok(ApiResponse.ok());
     }
 
 }

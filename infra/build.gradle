@@ -3,6 +3,7 @@ jar {
 }
 
 apply from: "${rootDir}/querydsl.gradle"
+apply from: "${rootDir}/message.gradle"
 
 dependencies {
     implementation project(':domain')
@@ -10,6 +11,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'org.postgresql:postgresql'
 
     // QueryDSL JPA 구현체

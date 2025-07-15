@@ -49,6 +49,12 @@ public class Notification extends BaseTime {
     private Boolean isRead;
 
     @ManyToOne(targetEntity = Account.class, fetch = LAZY, optional = false)
-    @JoinColumn(name = "accont_id", nullable = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
+
+
+    public static Notification of(String content, LocalDateTime notificationDate, Account account) {
+        return new Notification(null, content, notificationDate,
+            false, account);
+    }
 }

@@ -1,6 +1,7 @@
 jar.enabled = true
 
 apply from: "${rootDir}/querydsl.gradle"
+apply from: "${rootDir}/message.gradle"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
