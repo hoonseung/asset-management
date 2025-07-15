@@ -10,6 +10,8 @@ import com.sewon.asset.request.AssetTransferRequest;
 import com.sewon.asset.request.AssetUpdateRequest;
 import com.sewon.asset.request.electronic.ElectronicAssetListRegistrationRequest;
 import com.sewon.asset.request.electronic.ElectronicAssetRegistrationRequest;
+import com.sewon.asset.request.electronic.ElectronicAssetUpdateRequest;
+import com.sewon.asset.response.AssetEnableRentalResponse;
 import com.sewon.asset.response.AssetListResponse;
 import com.sewon.asset.response.AssetOneResponse;
 import com.sewon.common.response.ApiPagingResponse;
@@ -22,7 +24,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,10 +49,18 @@ public class AssetController {
     }
 
     @PutMapping()
-    public ResponseEntity<ApiResponse<String>> updateAsset(
+    public ResponseEntity<ApiResponse<Void>> updateAsset(
         @RequestBody AssetUpdateRequest request,
         @RequestParam("barcode") String barcode) {
         assetService.updateAsset(request.toGeneralAssetProperties(), barcode);
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+    @PutMapping("/electronic")
+    public ResponseEntity<ApiResponse<Void>> updateElectronicAsset(
+        @RequestBody ElectronicAssetUpdateRequest request,
+        @RequestParam("barcode") String barcode) {
+        assetService.updateAsset(request.toElectronicAssetProperties(), barcode);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
@@ -96,13 +105,6 @@ public class AssetController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<AssetOneResponse>> findAssetById(
-        @PathVariable("id") Long id) {
-        AssetOneResponse response = AssetOneResponse.from(assetService.findAssetResultById(id));
-        return ResponseEntity.ok(ApiResponse.ok(response));
-    }
-
     @GetMapping("/barcode")
     public ResponseEntity<ApiResponse<AssetOneResponse>> findAssetByBarcode(
         @RequestParam("value") String value) {
@@ -110,17 +112,11 @@ public class AssetController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<AssetListResponse>> findAllAsset() {
-        AssetListResponse listResponse = AssetListResponse.from(assetService.findAllAsset());
-        return ResponseEntity.ok(ApiResponse.ok(listResponse));
-    }
-
     @GetMapping("/paged")
     public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllByCondition(
         @ModelAttribute AssetSearchRequest request
     ) {
-        AssetListResponse listResponse = AssetListResponse.from(
+        AssetListResponse listResponse = AssetListResponse.fromAllAsset(
             assetService.findAllByCondition(
                 request.toAssetSearchProperties()));
         return ResponseEntity.ok(
@@ -129,14 +125,14 @@ public class AssetController {
     }
 
     @GetMapping("/paged/rental/enabled")
-    public ResponseEntity<ApiPagingResponse<AssetListResponse>> findAllRentalEnableAssetByCondition(
+    public ResponseEntity<ApiPagingResponse<List<AssetEnableRentalResponse>>> findAllRentalEnableAssetByCondition(
         @ModelAttribute AssetSearchRequest request
     ) {
-        AssetListResponse listResponse = AssetListResponse.from(
-            assetService.findAllRentalEnableAssetByCondition(
-                request.toAssetSearchProperties()));
+        List<AssetEnableRentalResponse> response = assetService.findAllRentalEnableAssetByCondition(
+                request.toAssetSearchProperties()).stream().map(AssetEnableRentalResponse::from)
+            .toList();
         return ResponseEntity.ok(
-            ApiPagingResponse.ok(listResponse, listResponse.listResponseSize())
+            ApiPagingResponse.ok(response, response.size())
         );
     }
 

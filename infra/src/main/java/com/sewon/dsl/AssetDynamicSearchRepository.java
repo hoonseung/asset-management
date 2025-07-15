@@ -5,14 +5,18 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathInits;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sewon.account.model.QAccount;
 import com.sewon.affiliation.model.QAffiliation;
-import com.sewon.asset.dto.AssetResult;
-import com.sewon.asset.dto.AssetSearchProperties;
+import com.sewon.asset.dto.properties.AssetSearchProperties;
+import com.sewon.asset.dto.result.AllAssetResult;
+import com.sewon.asset.dto.result.RentalResult;
 import com.sewon.asset.model.Asset;
 import com.sewon.asset.model.QAsset;
+import com.sewon.asset.model.QElectronicAsset;
 import com.sewon.asset.repository.AssetSearchRepository;
 import com.sewon.assetlocation.model.QAssetLocation;
 import com.sewon.assettype.model.QAssetType;
+import com.sewon.barcode.model.QBarcode;
 import com.sewon.corporation.model.QCorporation;
 import com.sewon.dsl.dto.AssetQueryResponseDto;
 import com.sewon.dsl.dto.QAssetQueryResponseDto;
@@ -31,16 +35,35 @@ import org.springframework.transaction.annotation.Transactional;
 public class AssetDynamicSearchRepository implements AssetSearchRepository {
 
     private final JPAQueryFactory queryFactory;
-    private final QAsset defaultAsset = QAsset.asset;
 
     @Override
-    public List<AssetResult> searchAssets(AssetSearchProperties properties) {
+    public List<AllAssetResult> searchAssets(AssetSearchProperties properties) {
         QAsset asset = new QAsset(PathMetadataFactory.forVariable("asset"),
             // 해당 엔티티들 한번에 초기화 하기 위해 연관 엔티티 지정
             new PathInits("barcode", "assetLocation.affiliation.corporation",
                 "assetType.assetType", "account"));
+
+        QElectronicAsset electronicAsset = new QElectronicAsset(
+            PathMetadataFactory.forVariable("electronic"),
+            new PathInits("barcode", "assetLocation.affiliation.corporation",
+                "assetType.assetType", "account"));
+
+        return getAssetQuery(properties, asset, electronicAsset)
+            .stream()
+            .map(this::from)
+            .toList()
+            ;
+    }
+
+    private List<AssetQueryResponseDto> getAssetQuery(AssetSearchProperties properties,
+        QAsset asset, QElectronicAsset electronicAsset) {
+        QBarcode barcode = asset.barcode;
+        QAssetLocation assetLocation = asset.assetLocation;
         QAffiliation affiliation = asset.assetLocation.affiliation;
         QCorporation corporation = asset.assetLocation.affiliation.corporation;
+        QAssetType assetType = asset.assetType;
+        QAccount account = asset.account;
+
         return queryFactory
             .select(new QAssetQueryResponseDto(
                 asset.id,
@@ -49,6 +72,7 @@ public class AssetDynamicSearchRepository implements AssetSearchRepository {
                 asset.assetLocation.affiliation.department,
                 asset.assetLocation.location,
                 asset.assetDivision,
+                asset.assetType,
                 asset.assetType.id,
                 asset.assetType.assetType.name,
                 asset.assetType.name,
@@ -57,36 +81,45 @@ public class AssetDynamicSearchRepository implements AssetSearchRepository {
                 asset.model,
                 asset.acquisitionDate,
                 asset.acquisitionPrice,
-                asset.account.name
+                asset.account.name,
+                electronicAsset.cpu,
+                electronicAsset.ram,
+                electronicAsset.storage,
+                electronicAsset.gpu,
+                asset.createdDate
             ))
             .from(asset)
-            .join(asset.barcode)
-            .join(asset.assetLocation)
+            .leftJoin(electronicAsset).on(electronicAsset.id.eq(asset.id))
+            .join(barcode)
+            .join(assetLocation)
             .join(affiliation)
             .join(corporation)
-            .join(asset.assetType)
-            .join(asset.account)
+            .join(assetType)
+            .join(account)
             .where(
-                eqLocation(properties.locationId()),
-                eqParentAndChildeType(properties.parentTypeId(), properties.childTypeId()),
+                eqCorporation(corporation, properties.corporationId()),
+                eqAffiliation(affiliation, properties.affiliationId()),
+                eqLocation(assetLocation, properties.locationId()),
+                eqParentAndChildeType(assetType, properties.parentTypeId(),
+                    properties.childTypeId()),
                 betweenDate(properties.after(), properties.before())
             ).limit(properties.size())
-            .fetch()
-            .stream()
-            .map(this::from)
-            .toList();
+            .fetch();
     }
 
+
     @Override
-    public List<AssetResult> searchRentalEnableAssets(AssetSearchProperties properties) {
+    public List<RentalResult> searchRentalEnableAssets(AssetSearchProperties properties) {
+        QAsset asset = QAsset.asset;
         QAssetRental assetRental = QAssetRental.assetRental;
         JPAQuery<Asset> query = queryFactory
-            .selectFrom(defaultAsset)
-            .leftJoin(defaultAsset.barcode).fetchJoin()
-            .leftJoin(assetRental).on(assetRental.asset.eq(defaultAsset))
+            .selectFrom(asset)
+            .leftJoin(asset.barcode).fetchJoin()
+            .leftJoin(assetRental).on(assetRental.asset.eq(asset))
             .where(
-                eqLocation(properties.locationId()),
-                eqParentAndChildeType(properties.parentTypeId(), properties.childTypeId()),
+                eqLocation(asset.assetLocation, properties.locationId()),
+                eqParentAndChildeType(asset.assetType, properties.parentTypeId(),
+                    properties.childTypeId()),
                 enableRental(assetRental)
             );
         if (properties.size() > 0) {
@@ -95,45 +128,56 @@ public class AssetDynamicSearchRepository implements AssetSearchRepository {
         return query
             .fetch()
             .stream()
-            .map(AssetResult::from)
+            .map(RentalResult::from)
             .toList();
     }
 
-    private BooleanExpression eqLocation(Long locationId) {
-        QAssetLocation assetLocation = defaultAsset.assetLocation;
+    // join에 참조 엔티티 넣어야함
+    public BooleanExpression eqCorporation(QCorporation corporation, Long corporationId) {
+        return corporationId != null ? corporation.id.eq(corporationId) : null;
+    }
+
+    // join에 참조 엔티티 넣어야함
+    public BooleanExpression eqAffiliation(QAffiliation affiliation, Long affiliationId) {
+        return affiliationId != null ? affiliation.id.eq(affiliationId) : null;
+    }
+
+
+    private BooleanExpression eqLocation(QAssetLocation assetLocation, Long locationId) {
         return locationId != null ? assetLocation.id.eq(locationId) : null;
     }
 
-    private BooleanExpression eqParentAndChildeType(Long parentTypeId, Long childTypeId) {
-        QAssetType assetType = defaultAsset.assetType;
+    private BooleanExpression eqParentAndChildeType(QAssetType assetType, Long parentTypeId,
+        Long childTypeId) {
         if (parentTypeId != null && childTypeId != null) {
             return assetType.id.eq(childTypeId).and(assetType.assetType.id.eq(parentTypeId));
         } else if (parentTypeId != null) {
-            return eqParentTypeId(parentTypeId);
+            return eqParentTypeId(assetType, parentTypeId);
         } else {
-            return eqChildTypeId(childTypeId);
+            return eqChildTypeId(assetType, childTypeId);
         }
     }
 
     private BooleanExpression betweenDate(LocalDate after, LocalDate before) {
+        QAsset asset = QAsset.asset;
         if (after != null && before != null) {
-            return defaultAsset.createdDate.between(after.atStartOfDay(),
+            return asset.createdDate.between(after.atStartOfDay(),
                 before.atTime(LocalTime.MAX));
         } else if (after != null) {
-            return defaultAsset.createdDate.goe(after.atStartOfDay());
+            return asset.createdDate.goe(after.atStartOfDay());
         } else if (before != null) {
-            return defaultAsset.createdDate.loe((before.atTime(LocalTime.MAX)));
+            return asset.createdDate.loe((before.atTime(LocalTime.MAX)));
         } else {
             return null;
         }
     }
 
-    private BooleanExpression eqParentTypeId(Long id) {
-        return id != null ? defaultAsset.assetType.assetType.id.eq(id) : null;
+    private BooleanExpression eqParentTypeId(QAssetType assetType, Long id) {
+        return id != null ? assetType.assetType.id.eq(id) : null;
     }
 
-    private BooleanExpression eqChildTypeId(Long id) {
-        return id != null ? defaultAsset.assetType.id.eq(id) : null;
+    private BooleanExpression eqChildTypeId(QAssetType assetType, Long id) {
+        return id != null ? assetType.id.eq(id) : null;
     }
 
     private BooleanExpression enableRental(QAssetRental assetRental) {
@@ -142,25 +186,32 @@ public class AssetDynamicSearchRepository implements AssetSearchRepository {
                 RentalStatus.REQUEST_RETURN, RentalStatus.EXPIRE));
     }
 
-    public AssetResult from(AssetQueryResponseDto dto) {
-        return AssetResult.of(
+    public AllAssetResult from(AssetQueryResponseDto dto) {
+        return new AllAssetResult(
             dto.getId(),
             dto.getBarcode(),
             dto.getCorporationName(),
             dto.getDepartment(),
             dto.getLocation(),
-            dto.getDivision().getDescription(),
+            dto.getDivision(),
+            dto.getAssetType(),
             dto.getAssetTypeId(),
             dto.getParentCategory(),
             dto.getChildCategory(),
-            dto.getStatus().getDescription(),
+            dto.getStatus(),
             dto.getManufacturer(),
             dto.getModel(),
-            dto.getAcquisitionDate().toLocalDate(),
+            dto.getAcquisitionDate(),
             dto.getAcquisitionPrice(),
-            dto.getRegisterName()
+            dto.getRegisterName(),
+            dto.getCpu(),
+            dto.getRam(),
+            dto.getStorage(),
+            dto.getGpu(),
+            dto.getRegistrationDate()
         );
     }
-
-
 }
+
+
+

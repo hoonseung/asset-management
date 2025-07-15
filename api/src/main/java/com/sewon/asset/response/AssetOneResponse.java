@@ -2,45 +2,59 @@ package com.sewon.asset.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sewon.asset.dto.AssetResult;
+import com.sewon.asset.dto.result.AllAssetResult;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @JsonInclude(Include.NON_EMPTY)
-public record AssetOneResponse(
+@Getter
+@AllArgsConstructor
+public class AssetOneResponse {
 
-    Long id,
-    String barcode,
-    String corporation,
-    String department,
-    String location,
-    String division,
-    String parentCategory,
-    String childCategory,
-    String status,
-    String manufacturer,
-    String model,
-    LocalDate acquisitionDate,
-    Integer acquisitionPrice,
-    String registerName
+    private final Long id;
+    private final String barcode;
+    private final String corporation;
+    private final String department;
+    private final String location;
+    private final String division;
+    private final String parentCategory;
+    private final String childCategory;
+    private final String status;
+    private final String manufacturer;
+    private final String model;
+    private final LocalDate acquisitionDate;
+    private final Integer acquisitionPrice;
+    private final String registerName;
+    private final String cpu;
+    private final Integer ram;
+    private BigDecimal storage;
+    private String gpu;
+    private final LocalDate registrationDate;
 
-) {
 
-    public static AssetOneResponse from(AssetResult asset) {
+    public static AssetOneResponse from(AllAssetResult asset) {
         return new AssetOneResponse(
-            asset.id(),
-            asset.barcode(),
-            asset.corporation(),
-            asset.department(),
-            asset.location(),
-            asset.division(),
-            asset.parentCategory(),
-            asset.childCategory(),
-            asset.status(),
-            asset.manufacturer(),
-            asset.model(),
-            asset.acquisitionDate(),
-            asset.acquisitionPrice(),
-            asset.registerName()
+            asset.getId(),
+            asset.getBarcode(),
+            asset.getCorporation(),
+            asset.getDepartment(),
+            asset.getLocation(),
+            asset.getDivision(),
+            asset.getParentCategory(),
+            asset.getChildCategory(),
+            asset.getStatus(),
+            asset.getManufacturer(),
+            asset.getModel(),
+            asset.getAcquisitionDate(),
+            asset.getAcquisitionPrice(),
+            asset.getRegisterName(),
+            asset.getCpu(),
+            asset.getRam(),
+            asset.getStorage(),
+            asset.getGpu(),
+            asset.getRegistrationDate()
         );
     }
 }

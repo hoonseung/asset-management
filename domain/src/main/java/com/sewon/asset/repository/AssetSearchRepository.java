@@ -1,12 +1,13 @@
 package com.sewon.asset.repository;
 
-import com.sewon.asset.dto.AssetResult;
-import com.sewon.asset.dto.AssetSearchProperties;
+import com.sewon.asset.dto.properties.AssetSearchProperties;
+import com.sewon.asset.dto.result.AllAssetResult;
+import com.sewon.asset.dto.result.RentalResult;
 import java.util.List;
 
 public interface AssetSearchRepository {
 
-    List<AssetResult> searchAssets(AssetSearchProperties properties);
+    List<AllAssetResult> searchAssets(AssetSearchProperties properties);
 
-    List<AssetResult> searchRentalEnableAssets(AssetSearchProperties properties);
+    List<RentalResult> searchRentalEnableAssets(AssetSearchProperties properties);
 }

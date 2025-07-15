@@ -1,5 +1,6 @@
 package com.sewon.stocktaking.application;
 
+import static com.sewon.notification.constant.MessageRoutingKey.STOCK_TAKING_LOCATION_EXPIRATION_KEY;
 import static com.sewon.stocktaking.constant.AssetCheckingStatus.DISABLE;
 import static com.sewon.stocktaking.constant.AssetCheckingStatus.MATCH;
 import static com.sewon.stocktaking.constant.AssetCheckingStatus.MISMATCH;
@@ -8,8 +9,8 @@ import static java.time.LocalDateTime.now;
 
 import com.sewon.account.application.AccountService;
 import com.sewon.account.model.Account;
-import com.sewon.asset.dto.AssetResult;
-import com.sewon.asset.dto.AssetSearchProperties;
+import com.sewon.asset.dto.properties.AssetSearchProperties;
+import com.sewon.asset.dto.result.AllAssetResult;
 import com.sewon.asset.model.Asset;
 import com.sewon.asset.repository.AssetSearchRepository;
 import com.sewon.assetlocation.application.AssetLocationService;
@@ -20,6 +21,7 @@ import com.sewon.common.exception.DomainException;
 import com.sewon.inbound.application.AssetInboundService;
 import com.sewon.inbound.constant.InboundType;
 import com.sewon.inbound.model.AssetInbound;
+import com.sewon.notification.application.NotificationProducer;
 import com.sewon.stocktaking.dto.AssetStockingItemResult;
 import com.sewon.stocktaking.dto.AssetStockingItemVerify;
 import com.sewon.stocktaking.dto.AssetStockingItemVerify.ItemVerify;
@@ -29,18 +31,18 @@ import com.sewon.stocktaking.model.AssetStockTakingItem;
 import com.sewon.stocktaking.repository.AssetStockTakingItemRepository;
 import com.sewon.stocktaking.repository.AssetStockTakingRepository;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 ;
 
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 @Service
 public class StockTakingService {
 
@@ -51,6 +53,27 @@ public class StockTakingService {
     private final AssetLocationService assetLocationService;
     private final AccountService accountService;
     private final AssetInboundService assetInboundService;
+
+    private static final int STOCK_TAKING_EXPIRE_DAY = 2; // 5일 기준
+
+    @Qualifier("stockTakingProducer")
+    private final NotificationProducer stockTakingProducer;
+
+    public StockTakingService(AssetStockTakingItemRepository assetStockTakingItemRepository,
+        AssetStockTakingRepository assetStockTakingRepository,
+        AssetSearchRepository assetSearchRepository, BarcodeService barcodeService,
+        AssetLocationService assetLocationService, AccountService accountService,
+        AssetInboundService assetInboundService,
+        @Qualifier("stockTakingProducer") NotificationProducer stockTakingProducer) {
+        this.assetStockTakingItemRepository = assetStockTakingItemRepository;
+        this.assetStockTakingRepository = assetStockTakingRepository;
+        this.assetSearchRepository = assetSearchRepository;
+        this.barcodeService = barcodeService;
+        this.assetLocationService = assetLocationService;
+        this.accountService = accountService;
+        this.assetInboundService = assetInboundService;
+        this.stockTakingProducer = stockTakingProducer;
+    }
 
     @Transactional
     public void registerStockTakingItems(List<String> barcodes, Long realLocationId,
@@ -63,9 +86,20 @@ public class StockTakingService {
 
         if (stockTaking.isPresent()) {
             assetStockTaking = stockTaking.get();
-            // 실사 시작일 1일 + 4일 보다  (총 5일) 보다 이후 인지 확인
-            if (LocalDate.now().isAfter(assetStockTaking.getStartingDate().plusDays(4))) {
-                assetStockTaking.setAuditingDate(assetStockTaking.getStartingDate().plusDays(5));
+
+            // 현재일이 실사 시작일 + 2일과 같을 때
+            long day = STOCK_TAKING_EXPIRE_DAY - ChronoUnit.DAYS.between(
+                assetStockTaking.getStartingDate(), LocalDate.now());
+            if (day > 0) {
+                String message = day + "." + assetStockTaking.getAssetLocation().getLocation() + "."
+                    + assetStockTaking.getAccount().getAffiliation().getId();
+                stockTakingProducer.sendingNotification(message,
+                    STOCK_TAKING_LOCATION_EXPIRATION_KEY.getKey());
+            }
+
+            // 실사 시작일 1일 + 1일 보다  (총 2일) 보다 이후 인지 확인
+            if (LocalDate.now().isAfter(assetStockTaking.getStartingDate().plusDays(1))) {
+                assetStockTaking.setAuditingDate(assetStockTaking.getStartingDate().plusDays(1));
                 throw new DomainException(STOCK_TAKING_EXPIRATION);
             } else {
                 assetLocation = assetStockTaking.getAssetLocation();
@@ -108,32 +142,32 @@ public class StockTakingService {
 
         List<ItemVerify> match = new ArrayList<>();
         List<ItemVerify> unmatch = new ArrayList<>();
-        List<ItemVerify> diable = new ArrayList<>();
+        List<ItemVerify> disable = new ArrayList<>();
 
         barcodes.forEach(value ->
         {
             Asset asset = barcodeService.findAssetByValue(value);
-            if (AssetStockTakingItem.diable(
+            if (AssetStockTakingItem.disable(
                 AssetStockTakingItem.getAssetCheckingStatus(asset, assetLocation))) {
-                diable.add(new ItemVerify(value, asset.getLocation(),
+                disable.add(new ItemVerify(value, asset.getLocation(),
                     assetLocation.getLocation(), DISABLE.name()));
             } else if (AssetStockTakingItem.change(
                 AssetStockTakingItem.getAssetCheckingStatus(asset, assetLocation))) {
-                match.add(new ItemVerify(value, asset.getLocation(),
+                unmatch.add(new ItemVerify(value, asset.getLocation(),
                     assetLocation.getLocation(), MISMATCH.name()));
             } else {
-                unmatch.add(new ItemVerify(value, asset.getLocation(),
+                match.add(new ItemVerify(value, asset.getLocation(),
                     assetLocation.getLocation(), MATCH.name()));
             }
 
         });
-        return new AssetStockingItemVerify(match, unmatch, diable);
+        return new AssetStockingItemVerify(match, unmatch, disable);
     }
 
 
     public List<StockTakingAsset> findAllWithAssetStockingAsset(AssetSearchProperties properties) {
         // 해당 위치 자산 전부 조회
-        List<AssetResult> allAsset = assetSearchRepository.searchAssets(
+        List<AllAssetResult> allAsset = assetSearchRepository.searchAssets(
             properties.toWithOutBetween());
         // 실사 조회
         List<AssetStockTaking> assetStockTaking = assetStockTakingRepository.findByLocationIdAndBetweenStartingDate(
@@ -149,8 +183,10 @@ public class StockTakingService {
         // 해당 위치 자산이랑 실사 자산이랑 일치 하지 않는 자산은 실사 미완료
         allAsset.stream()
             .filter(asset -> stockAssets.stream()
-                .allMatch(stockAsset -> !stockAsset.getId().equals(asset.id())
-                    && asset.assetTypeId().equals(stockAsset.getAssetTypeId()))
+                .allMatch(stockAsset -> !stockAsset.getId().equals(asset.getId())
+                    &&
+                    eqParentAndChildeType
+                        (asset.getAssetType(), properties.parentTypeId(), properties.childTypeId()))
             ).map(it -> StockTakingAsset.of(AssetStockingItemResult.from(it), false))
             .forEach(assets::add);
 
@@ -170,9 +206,9 @@ public class StockTakingService {
 
     public List<AssetStockingItemResult> findAllAssetStockingUnCompletedAsset(
         AssetSearchProperties properties) {
-        List<AssetResult> assets = new ArrayList<>();
+        List<AllAssetResult> assets = new ArrayList<>();
         // 실사 조회
-        List<AssetResult> allAsset = assetSearchRepository.searchAssets(
+        List<AllAssetResult> allAsset = assetSearchRepository.searchAssets(
             properties.toWithOutBetween());
         List<AssetStockTaking> assetStockTaking = assetStockTakingRepository.findByLocationIdAndBetweenStartingDate(
             properties.locationId(),
@@ -181,8 +217,9 @@ public class StockTakingService {
         List<Asset> stockAssets = getStockTakingAsset(properties, assetStockTaking);
         allAsset.stream()
             .filter(asset -> stockAssets.stream()
-                .allMatch(stockAsset -> !stockAsset.getId().equals(asset.id())
-                    && asset.assetTypeId().equals(stockAsset.getAssetTypeId()))
+                .allMatch(stockAsset -> !stockAsset.getId().equals(asset.getId())
+                    && eqParentAndChildeType(asset.getAssetType(), properties.parentTypeId(),
+                    properties.childTypeId()))
             ).forEach(assets::add);
         return assets.stream()
             .map(AssetStockingItemResult::from)

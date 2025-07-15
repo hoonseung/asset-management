@@ -1,6 +1,6 @@
 package com.sewon.asset.request;
 
-import com.sewon.asset.dto.AssetSearchProperties;
+import com.sewon.asset.dto.properties.AssetSearchProperties;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +12,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Getter
 public class AssetSearchRequest {
 
+    private String corporationId;
+    private String affiliationId;
     private String locationId;
     private String parentTypeId;
     private String childTypeId;
@@ -22,11 +24,13 @@ public class AssetSearchRequest {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate before;
 
-    private int size;
+    private int size = 10000;
 
 
     public AssetSearchProperties toAssetSearchProperties() {
         return AssetSearchProperties.of(
+            corporationId != null ? Long.valueOf(corporationId) : null,
+            affiliationId != null ? Long.valueOf(affiliationId) : null,
             locationId != null ? Long.valueOf(locationId) : null,
             parentTypeId != null ? Long.valueOf(parentTypeId) : null,
             childTypeId != null ? Long.valueOf(childTypeId) : null,

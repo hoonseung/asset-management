@@ -5,9 +5,11 @@ import static java.time.LocalDateTime.now;
 
 import com.sewon.account.application.AccountService;
 import com.sewon.account.model.Account;
-import com.sewon.asset.dto.AssetProperties;
-import com.sewon.asset.dto.AssetResult;
-import com.sewon.asset.dto.AssetSearchProperties;
+import com.sewon.asset.dto.properties.AssetProperties;
+import com.sewon.asset.dto.properties.AssetSearchProperties;
+import com.sewon.asset.dto.result.AllAssetResult;
+import com.sewon.asset.dto.result.AssetResult;
+import com.sewon.asset.dto.result.RentalResult;
 import com.sewon.asset.model.Asset;
 import com.sewon.asset.repository.AssetRepository;
 import com.sewon.asset.repository.AssetSearchRepository;
@@ -124,7 +126,7 @@ public class AssetService {
 
     @Transactional
     public void updateAsset(AssetProperties properties, String barcode) {
-        Asset asset = assetRepository.findByBarcode(barcode)
+        Asset asset = assetRepository.findAssetByValue(barcode)
             .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND));
         AssetLocation assetLocation = assetLocationService.findAssetLocationById(
             properties.getLocationId());
@@ -171,22 +173,21 @@ public class AssetService {
         );
     }
 
-    public AssetResult findAssetByBarcode(String value) {
-        return AssetResult.from(assetRepository.findByBarcode(value)
-            .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND))
-        );
+    public AllAssetResult findAssetByBarcode(String value) {
+        return assetRepository.findAllAssetByBarcode(value)
+            .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND));
     }
 
-    public List<AssetResult> findAllAsset() {
-        return assetRepository.findAll()
-            .stream().map(AssetResult::from).toList();
+    public List<AllAssetResult> findAllAsset(int size) {
+        return assetRepository.findAll(size);
     }
 
-    public List<AssetResult> findAllByCondition(AssetSearchProperties properties) {
+    public List<AllAssetResult> findAllByCondition(AssetSearchProperties properties) {
         return assetSearchRepository.searchAssets(properties);
     }
 
-    public List<AssetResult> findAllRentalEnableAssetByCondition(AssetSearchProperties properties) {
+    public List<RentalResult> findAllRentalEnableAssetByCondition(
+        AssetSearchProperties properties) {
         return assetSearchRepository.searchRentalEnableAssets(properties);
     }
 

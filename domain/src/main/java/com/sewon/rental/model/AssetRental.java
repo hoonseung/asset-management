@@ -119,6 +119,12 @@ public class AssetRental extends BaseTime {
         this.rentalStatus = RentalStatus.RETURN;
     }
 
+    public void returnRequestCancel() {
+        if (RentalStatus.REQUEST_RETURN.equals(this.rentalStatus)) {
+            this.rentalStatus = RentalStatus.RENT;
+        }
+    }
+
     public void rentalExpire() {
         this.rentalStatus = RentalStatus.EXPIRE;
     }
@@ -172,5 +178,12 @@ public class AssetRental extends BaseTime {
         return asset.getAccountName();
     }
 
+    public Long getLocationAffiliationId() {
+        return asset.getAssetLocation().getAffiliation().getId();
+    }
+
+    public Long getAccountAffiliationId() {
+        return account.getAffiliation().getId();
+    }
 
 }

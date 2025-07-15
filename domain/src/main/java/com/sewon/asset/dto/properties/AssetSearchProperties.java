@@ -1,8 +1,10 @@
-package com.sewon.asset.dto;
+package com.sewon.asset.dto.properties;
 
 import java.time.LocalDate;
 
 public record AssetSearchProperties(
+    Long corporationId,
+    Long affiliationId,
     Long locationId,
     Long parentTypeId,
     Long childTypeId,
@@ -12,6 +14,8 @@ public record AssetSearchProperties(
 ) {
 
     public static AssetSearchProperties of(
+        Long corporationId,
+        Long affiliationId,
         Long locationId,
         Long pTypeId,
         Long cTypeId,
@@ -20,6 +24,8 @@ public record AssetSearchProperties(
         int size
     ) {
         return new AssetSearchProperties(
+            corporationId,
+            affiliationId,
             locationId,
             pTypeId,
             cTypeId,
@@ -31,6 +37,8 @@ public record AssetSearchProperties(
 
     public AssetSearchProperties toWithOutBetween() {
         return new AssetSearchProperties(
+            this.corporationId,
+            this.affiliationId,
             this.locationId,
             this.parentTypeId,
             this.childTypeId,

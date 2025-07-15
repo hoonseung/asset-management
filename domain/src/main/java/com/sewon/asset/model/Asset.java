@@ -177,4 +177,8 @@ public class Asset extends BaseTime {
     public boolean isEnableTransferLocation(AssetLocation location) {
         return getAssetLocation().getId().equals(location.getId());
     }
+
+    public Long getAffiliationId() {
+        return assetLocation.getAffiliation().getId();
+    }
 }

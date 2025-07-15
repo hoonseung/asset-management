@@ -1,6 +1,6 @@
 package com.sewon.stocktaking.dto;
 
-import com.sewon.asset.dto.AssetResult;
+import com.sewon.asset.dto.result.AllAssetResult;
 import com.sewon.asset.model.Asset;
 import java.time.LocalDate;
 
@@ -40,22 +40,22 @@ public record AssetStockingItemResult(
         );
     }
 
-    public static AssetStockingItemResult from(AssetResult asset) {
+    public static AssetStockingItemResult from(AllAssetResult asset) {
         return new AssetStockingItemResult(
-            asset.id(),
-            asset.barcode(),
-            asset.corporation(),
-            asset.department(),
-            asset.location(),
-            asset.division(),
-            asset.parentCategory(),
-            asset.childCategory(),
-            asset.status(),
-            asset.manufacturer(),
-            asset.model(),
-            asset.acquisitionDate(),
-            asset.acquisitionPrice(),
-            asset.registerName()
+            asset.getId(),
+            asset.getBarcode(),
+            asset.getCorporation(),
+            asset.getDepartment(),
+            asset.getLocation(),
+            asset.getDivision(),
+            asset.getParentCategory(),
+            asset.getChildCategory(),
+            asset.getStatus(),
+            asset.getManufacturer(),
+            asset.getModel(),
+            asset.getAcquisitionDate(),
+            asset.getAcquisitionPrice(),
+            asset.getRegisterName()
         );
     }
 }

@@ -66,7 +66,7 @@ public class AssetStockTakingItem extends BaseTime {
     @Column(name = "is_changed")
     private Boolean isChanged;
 
-
+    // 위치 확인
     public static AssetStockTakingItem of(AssetLocation assetLocation,
         Asset asset, AssetStockTaking assetStockTaking) {
         AssetCheckingStatus status = getAssetCheckingStatus(asset, assetLocation);
@@ -91,7 +91,7 @@ public class AssetStockTakingItem extends BaseTime {
         return MISMATCH.equals(status);
     }
 
-    public static boolean diable(AssetCheckingStatus status) {
+    public static boolean disable(AssetCheckingStatus status) {
         return DISABLE.equals(status);
     }
 

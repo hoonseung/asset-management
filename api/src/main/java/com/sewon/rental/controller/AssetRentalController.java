@@ -74,11 +74,19 @@ public class AssetRentalController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    @PostMapping("/request/reject")
+    public ResponseEntity<ApiResponse<Void>> rejectAllAssetRentalById(
+        @RequestBody RentalDeleteRequest request) {
+        assetRentalService.rejectAllAssetRentalById(request.ids());
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
     @DeleteMapping()
     public ResponseEntity<ApiResponse<Void>> deleteAllAssetRentalById(
         @RequestBody RentalDeleteRequest request) {
         assetRentalService.deleteAllAssetRentalById(request.ids());
         return ResponseEntity.ok(ApiResponse.ok());
     }
+
 
 }

@@ -1,5 +1,12 @@
 package com.sewon.rental.application;
 
+import static com.sewon.notification.constant.MessageRoutingKey.RENTAL_CHECK_EXPIRATION_KEY;
+import static com.sewon.notification.constant.MessageRoutingKey.RENTAL_REQUEST_APPROVE_KEY;
+import static com.sewon.notification.constant.MessageRoutingKey.RENTAL_REQUEST_RECEIVED_KEY;
+import static com.sewon.notification.constant.MessageRoutingKey.RENTAL_REQUEST_REJECT_KEY;
+import static com.sewon.notification.constant.MessageRoutingKey.RETURN_REQUEST_APPROVE_KEY;
+import static com.sewon.notification.constant.MessageRoutingKey.RETURN_REQUEST_RECEIVED_KEY;
+import static com.sewon.notification.constant.MessageRoutingKey.RETURN_REQUEST_REJECT_KEY;
 import static com.sewon.rental.constant.RentalStatus.RENT;
 import static com.sewon.rental.constant.RentalStatus.REQUEST_RENTAL;
 import static com.sewon.rental.constant.RentalStatus.REQUEST_RETURN;
@@ -15,6 +22,7 @@ import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.common.exception.DomainException;
 import com.sewon.inbound.constant.InboundType;
 import com.sewon.inbound.model.AssetInbound;
+import com.sewon.notification.application.NotificationProducer;
 import com.sewon.outbound.constant.OutboundType;
 import com.sewon.outbound.model.AssetOutbound;
 import com.sewon.rental.constant.RentalStatus;
@@ -23,12 +31,11 @@ import com.sewon.rental.model.AssetRental;
 import com.sewon.rental.repository.AssetRentalRepository;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 @Service
 public class AssetRentalService {
 
@@ -37,6 +44,18 @@ public class AssetRentalService {
     private final AssetService assetService;
     private final AssetLocationService assetLocationService;
 
+    private final NotificationProducer rentalProducer;
+
+    public AssetRentalService(AssetRentalRepository assetRentalRepository,
+        AccountService accountService, AssetService assetService,
+        AssetLocationService assetLocationService,
+        @Qualifier("rentalProducer") NotificationProducer rentalProducer) {
+        this.assetRentalRepository = assetRentalRepository;
+        this.accountService = accountService;
+        this.assetService = assetService;
+        this.assetLocationService = assetLocationService;
+        this.rentalProducer = rentalProducer;
+    }
 
     @Transactional
     public void requestAssetRental(Long assetId, Long locationId, LocalDate fromDate,
@@ -47,6 +66,10 @@ public class AssetRentalService {
 
         assetRentalRepository.save(
             getRequestAssetRental(fromDate, toDate, account, asset, toLocation));
+
+        rentalProducer.sendingNotification(
+            asset.getAffiliationId(),
+            RENTAL_REQUEST_RECEIVED_KEY.getKey());
     }
 
 
@@ -57,13 +80,22 @@ public class AssetRentalService {
                 rental.inbounded(getRentalInbound(rental));
                 rental.outbounded(getRentalOutbound(rental));
                 rental.rentalApprove();
+                rentalProducer.sendingNotification(
+                    rental.getAccountAffiliationId(),
+                    RENTAL_REQUEST_APPROVE_KEY.getKey()
+                );
             });
     }
 
     @Transactional
     public void requestAssetReturn(List<Long> ids) {
         assetRentalRepository.findAllByIds(ids)
-            .forEach(AssetRental::requestRentalReturn);
+            .forEach(rental -> {
+                rental.requestRentalReturn();
+                rentalProducer.sendingNotification(
+                    rental.getLocationAffiliationId(),
+                    RETURN_REQUEST_RECEIVED_KEY.getKey());
+            });
     }
 
     @Transactional
@@ -73,13 +105,47 @@ public class AssetRentalService {
                 rental.outbounded(getReturnOutbound(rental));
                 rental.inbounded(getReturnInbound(rental));
                 rental.returnApprove();
+                rentalProducer.sendingNotification(
+                    rental.getAccountAffiliationId(),
+                    RETURN_REQUEST_APPROVE_KEY.getKey()
+                );
             });
     }
 
+    @Transactional
+    public void returnRequestCancel(List<Long> ids) {
+        assetRentalRepository.findAllByIds(ids)
+            .forEach(AssetRental::returnRequestCancel);
+    }
+
+    @Transactional
+    public void rejectReturnRequest(List<Long> ids) {
+        assetRentalRepository.findAllByIds(ids)
+            .forEach(rental -> {
+                rental.returnRequestCancel();
+                rentalProducer.sendingNotification(
+                    rental.getAccountAffiliationId(),
+                    RETURN_REQUEST_REJECT_KEY.getKey()
+                );
+            });
+    }
 
     @Transactional
     public void deleteAllAssetRentalById(List<Long> ids) {
         assetRentalRepository.deleteAllByIds(ids);
+    }
+
+    @Transactional
+    public void rejectAllAssetRentalById(List<Long> ids) {
+        assetRentalRepository.deleteAllByIds(ids);
+
+        assetRentalRepository.findAllByIds(ids)
+            .forEach(rental ->
+                rentalProducer.sendingNotification(
+                    rental.getAccountAffiliationId(),
+                    RENTAL_REQUEST_REJECT_KEY.getKey()
+                )
+            );
     }
 
     public AssetRental findAssetRentalById(Long id) {
@@ -115,7 +181,11 @@ public class AssetRentalService {
             RENT, affiliationId);
         assetRentals.stream()
             .filter(AssetRental::isExpire)
-            .forEach(AssetRental::rentalExpire);
+            .forEach(rental -> {
+                String message = rental.getAsset().getBarcodeValue() + "." + affiliationId;
+                rentalProducer.sendingNotification(message,
+                    RENTAL_CHECK_EXPIRATION_KEY.getKey());
+            });
 
         return assetRentals.stream().map(AssetRentalResult::from)
             .toList();
