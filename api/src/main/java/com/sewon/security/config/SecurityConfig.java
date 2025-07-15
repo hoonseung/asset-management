@@ -33,7 +33,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChainConfig(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(
-                request -> request.requestMatchers("/account/login", "/account/register",
+                request -> request.requestMatchers("/account/login"
+                        , "/account/register", "/notifications/connect/**",
                         "/account/auth/token-refresh").permitAll()
                     .requestMatchers(HttpMethod.GET,
                         "/affiliations", "/locations", "/asset-types", "/corporations")
