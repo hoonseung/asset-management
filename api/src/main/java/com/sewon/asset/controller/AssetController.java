@@ -3,6 +3,7 @@ package com.sewon.asset.controller;
 import com.sewon.asset.application.AssetService;
 import com.sewon.asset.model.Asset;
 import com.sewon.asset.request.AssetDeleteRequest;
+import com.sewon.asset.request.AssetDisposeRequest;
 import com.sewon.asset.request.AssetListRegistrationRequest;
 import com.sewon.asset.request.AssetRegistrationRequest;
 import com.sewon.asset.request.AssetSearchRequest;
@@ -103,6 +104,13 @@ public class AssetController {
         assetService.transferAsset(request.assetId(), request.fromLocationId()
             , request.toLocationId(), authUser.getId());
         return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+    @PostMapping("/dispose")
+    public ResponseEntity<ApiResponse<List<String>>> disposeAsset(
+        @RequestBody AssetDisposeRequest request) {
+        List<String> succeedBarcodes = assetService.disposeAsset(request.barcodes());
+        return ResponseEntity.ok(ApiResponse.ok(succeedBarcodes));
     }
 
     @GetMapping("/barcode")

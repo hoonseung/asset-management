@@ -2,6 +2,7 @@ package com.sewon.jpa.barcode;
 
 import com.sewon.asset.model.Asset;
 import com.sewon.barcode.model.Barcode;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,7 @@ public interface BarcodeJpaRepository extends JpaRepository<Barcode, Long> {
 
     @Query("select b.asset from Barcode b where b.value = :value")
     Optional<Asset> findAssetByBarcode(@Param("value") String value);
+
+    @Query("select b.asset from Barcode b where b.value in :barcodes")
+    List<Asset> findAllAssetByBarcodeIn(List<String> barcodes);
 }

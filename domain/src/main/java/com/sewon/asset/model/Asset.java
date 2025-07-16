@@ -126,6 +126,10 @@ public class Asset extends BaseTime {
             barcode);
     }
 
+    public void dispose() {
+        this.assetStatus = AssetStatus.UNUSED;
+    }
+
     public Long getAssetTypeId() {
         return this.assetType.getId();
     }

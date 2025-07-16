@@ -39,13 +39,18 @@ public class JpaAssetRepository implements AssetRepository {
     }
 
     @Override
-    public Optional<AllAssetResult> findAllAssetByBarcode(String value) {
+    public Optional<AllAssetResult> findAssetDtoByBarcode(String value) {
         return assetJpaRepository.findAssetByBarcode(value);
     }
 
     @Override
-    public Optional<Asset> findAssetByValue(String value) {
+    public Optional<Asset> findAssetByBarcode(String value) {
         return barcodeJpaRepository.findAssetByBarcode(value);
+    }
+
+    @Override
+    public List<Asset> findAllAssetByBarcode(List<String> values) {
+        return barcodeJpaRepository.findAllAssetByBarcodeIn(values);
     }
 
     @Override

@@ -13,11 +13,13 @@ public interface AssetRepository {
 
     Optional<Asset> findById(Long id);
 
-    Optional<AllAssetResult> findAllAssetByBarcode(String value);
+    Optional<AllAssetResult> findAssetDtoByBarcode(String value);
 
     List<AllAssetResult> findAll(int size);
 
-    Optional<Asset> findAssetByValue(String value);
+    Optional<Asset> findAssetByBarcode(String value);
+
+    List<Asset> findAllAssetByBarcode(List<String> values);
 
     void deleteAllById(List<Long> ids);
 

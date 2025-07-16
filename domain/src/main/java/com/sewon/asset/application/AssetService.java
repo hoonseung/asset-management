@@ -126,7 +126,7 @@ public class AssetService {
 
     @Transactional
     public void updateAsset(AssetProperties properties, String barcode) {
-        Asset asset = assetRepository.findAssetByValue(barcode)
+        Asset asset = assetRepository.findAssetByBarcode(barcode)
             .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND));
         AssetLocation assetLocation = assetLocationService.findAssetLocationById(
             properties.getLocationId());
@@ -156,6 +156,16 @@ public class AssetService {
         throw new DomainException(ASSET_NOT_FOUND);
     }
 
+    @Transactional
+    public List<String> disposeAsset(List<String> barcodes) {
+        return assetRepository.findAllAssetByBarcode(barcodes)
+            .stream()
+            .map(asset -> {
+                asset.dispose();
+                return asset.getBarcodeValue();
+            }).toList();
+    }
+
 
     @Transactional
     public void deleteAllAssetById(List<Long> ids) {
@@ -174,7 +184,7 @@ public class AssetService {
     }
 
     public AllAssetResult findAssetByBarcode(String value) {
-        return assetRepository.findAllAssetByBarcode(value)
+        return assetRepository.findAssetDtoByBarcode(value)
             .orElseThrow(() -> new DomainException(ASSET_NOT_FOUND));
     }
 
