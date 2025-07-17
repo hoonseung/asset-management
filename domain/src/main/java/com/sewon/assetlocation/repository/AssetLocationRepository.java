@@ -15,4 +15,6 @@ public interface AssetLocationRepository {
     List<AssetLocation> findAllByAffiliationId(Long id);
 
     void deleteById(Long id);
+
+    boolean existsAssetByAssetLocationId(Long id);
 }

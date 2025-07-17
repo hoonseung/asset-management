@@ -17,4 +17,9 @@ public interface AssetTypeJpaRepository extends JpaRepository<AssetType, Long> {
 
     List<AssetType> findAllByAssetTypeId(Long id);
 
+    @Query(
+        "select case when count(a) > 0 then true else false end from Asset a where a.assetType.id = :id"
+            + " or a.assetType.assetType.id = :id")
+    boolean existsAssetByAssetTypeId(Long id);
+
 }

@@ -43,4 +43,9 @@ public class JpaAffiliationRepository implements AffiliationRepository {
     public void deleteById(Long id) {
         affiliationJpaRepository.deleteById(id);
     }
+
+    @Override
+    public boolean existsAccountByAffiliationId(Long id) {
+        return affiliationJpaRepository.existsAccountByAffiliationId(id);
+    }
 }

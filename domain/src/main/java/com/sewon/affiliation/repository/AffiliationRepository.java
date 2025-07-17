@@ -17,4 +17,6 @@ public interface AffiliationRepository {
     List<Affiliation> findAll();
 
     void deleteById(Long id);
+
+    boolean existsAccountByAffiliationId(Long id);
 }

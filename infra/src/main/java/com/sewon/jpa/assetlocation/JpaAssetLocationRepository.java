@@ -37,4 +37,9 @@ public class JpaAssetLocationRepository implements AssetLocationRepository {
     public void deleteById(Long id) {
         assetLocationJpaRepository.deleteById(id);
     }
+
+    @Override
+    public boolean existsAssetByAssetLocationId(Long id) {
+        return assetLocationJpaRepository.existsAssetByAssetLocationId(id);
+    }
 }

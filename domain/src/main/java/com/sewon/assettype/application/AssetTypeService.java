@@ -42,7 +42,8 @@ public class AssetTypeService {
 
     @Transactional
     public void deleteAssetTypeById(Long id) {
-        if (assetTypeRepository.findAllById(id).isEmpty()) {
+        if (assetTypeRepository.findAllById(id).isEmpty()
+            && !assetTypeRepository.existsAssetByAssetTypeId(id)) {
             assetTypeRepository.deleteById(id);
             return;
         }

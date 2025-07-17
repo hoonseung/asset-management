@@ -46,7 +46,8 @@ public class AffiliationService {
 
     @Transactional
     public void deleteAffiliationById(Long id) {
-        if (assetLocationRepository.findAllByAffiliationId(id).isEmpty()) {
+        if (assetLocationRepository.findAllByAffiliationId(id).isEmpty()
+            && !affiliationRepository.existsAccountByAffiliationId(id)) {
             affiliationRepository.deleteById(id);
             return;
         }

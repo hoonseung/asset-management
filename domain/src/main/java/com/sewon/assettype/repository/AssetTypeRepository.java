@@ -22,4 +22,6 @@ public interface AssetTypeRepository {
 
     void deleteById(Long id);
 
+    boolean existsAssetByAssetTypeId(Long id);
+
 }

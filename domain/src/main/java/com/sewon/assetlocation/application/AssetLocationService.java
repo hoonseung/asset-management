@@ -1,5 +1,6 @@
 package com.sewon.assetlocation.application;
 
+import static com.sewon.assetlocation.exception.LocationErrorCode.LOCATION_DELETE_ERROR;
 import static com.sewon.assetlocation.exception.LocationErrorCode.LOCATION_DUPLICATION;
 import static com.sewon.assetlocation.exception.LocationErrorCode.LOCATION_NOT_FOUND;
 
@@ -42,6 +43,9 @@ public class AssetLocationService {
 
     @Transactional
     public void deleteAssetLocationById(Long id) {
+        if (assetLocationRepository.existsAssetByAssetLocationId(id)) {
+            throw new DomainException(LOCATION_DELETE_ERROR);
+        }
         assetLocationRepository.deleteById(id);
     }
 

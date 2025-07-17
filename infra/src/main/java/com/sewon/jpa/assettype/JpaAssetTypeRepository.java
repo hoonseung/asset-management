@@ -52,4 +52,9 @@ public class JpaAssetTypeRepository implements AssetTypeRepository {
     public void deleteById(Long id) {
         assetTypeJpaRepository.deleteById(id);
     }
+
+    @Override
+    public boolean existsAssetByAssetTypeId(Long id) {
+        return assetTypeJpaRepository.existsAssetByAssetTypeId(id);
+    }
 }
