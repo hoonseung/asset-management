@@ -14,11 +14,11 @@ public class ReadCheckProducer implements NotificationProducer {
 
     @Override
     public void sendingNotification(Object message, String routingKey) {
-        if (message instanceof Long id) {
+        if (message instanceof String) {
             rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE,
                 routingKey,
-                String.valueOf(id)
+                message
             );
         }
     }

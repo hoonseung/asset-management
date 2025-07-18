@@ -1,57 +1,64 @@
 package com.sewon.message.notification;
 
-import static com.sewon.config.RabbitMQConfig.RENTAL_EXPIRE_QUEUE;
+import static com.sewon.config.RabbitMQConfig.NOTIFY_READ_QUEUE;
 
 import com.sewon.jpa.notification.JpaNotificationRepository;
 import com.sewon.message.repository.SseEmitterRepository;
-import java.util.HashSet;
+import com.sewon.notification.repository.NotificationCacheRepository;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+@Slf4j
 @Service
 public class ReadCheckConsumer extends AbstractConsumer {
 
     private final Map<Long, Set<Long>> notificationUpdateStore = new ConcurrentHashMap<>();
+    private final NotificationCacheRepository notificationCacheRepository;
 
     public ReadCheckConsumer(JpaNotificationRepository jpaNotificationRepository,
+        NotificationCacheRepository notificationCacheRepository,
         SseEmitterRepository sseEmitterRepository) {
         super(jpaNotificationRepository, sseEmitterRepository);
+        this.notificationCacheRepository = notificationCacheRepository;
     }
 
-    @Transactional
-    @RabbitListener(queues = RENTAL_EXPIRE_QUEUE)
+
+    @RabbitListener(queues = NOTIFY_READ_QUEUE)
     public void doConsumeNotify(String message) {
         if (message != null) {
             String[] split = message.split("\\.");
             Long accountId = Long.valueOf(split[0]);
             Long notificationId = Long.valueOf(split[1]);
 
-            // accountId로 조회가 안되면 accountId를 키로 해서 put
-            Set<Long> notifyList = notificationUpdateStore.computeIfAbsent(
-                accountId, key -> {
-                    Set<Long> ids = new HashSet<>();
-                    ids.add(notificationId);
-                    return ids;
-                });
+            String hashKey = "readCheck";
+            Set<Long> ids = notificationCacheRepository.getSet(hashKey,
+                accountId);
+            ids.add(notificationId);
 
-            notifyList.add(notificationId);
+            notificationCacheRepository.put(hashKey, accountId, ids);
         }
 
     }
 
-    // 30분마다 notificationUpdateStore를 flush하는 스케줄러
-    @Scheduled(fixedRate = 30 * 60 * 1000)
+    // 앱 시작 후 30분뒤 첫 호출 이후 주기는 30분
+    @Transactional
+    @Scheduled(initialDelay = 10 * 60 * 1000, fixedRate = 30 * 60 * 1000)
     public void flushNotificationUpdateStore() {
-        notificationUpdateStore.forEach((accountId, notifyList) -> {
+        log.info("invoked flushNotificationUpdateStore method");
+
+        String hashKey = "readCheck";
+
+        notificationCacheRepository.getMap(hashKey).forEach((accountId, notifyList) -> {
             if (!notifyList.isEmpty()) {
                 jpaNotificationRepository.readUpdateByIds(notifyList);
-                notificationUpdateStore.put(accountId, new HashSet<>());
+                notificationCacheRepository.removeValues(hashKey, accountId);
+                log.info("finished accountId: {} flushNotificationUpdate", accountId);
             }
         });
     }
