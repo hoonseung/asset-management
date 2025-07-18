@@ -6,6 +6,7 @@ import static lombok.AccessLevel.PROTECTED;
 
 import com.sewon.affiliation.model.Affiliation;
 import com.sewon.common.model.BaseTime;
+import com.sewon.corporation.model.Corporation;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -51,15 +52,16 @@ public class AssetLocation extends BaseTime {
         return new AssetLocation(null, location, affiliation);
     }
 
-    public String getCorporation() {
+    public String getCorporationName() {
         return this.affiliation.getCorporationName();
+    }
+
+    public Corporation getCorporation() {
+        return this.affiliation.getCorporation();
     }
 
     public String getDepartment() {
         return this.affiliation.getDepartment();
     }
 
-    public boolean isEqualLocation(String location) {
-        return this.location.equals(location);
-    }
 }

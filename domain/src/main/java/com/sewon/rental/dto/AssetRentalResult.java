@@ -25,7 +25,7 @@ public record AssetRentalResult(
             rental.getId(),
             rental.getAsset().getId(),
             rental.getBarcodeValue(),
-            rental.getCorporation(),
+            rental.getCorporationName(),
             rental.getDepartment(),
             rental.getAssetLocation(),
             rental.getRentLocation(),

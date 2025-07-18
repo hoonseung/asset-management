@@ -33,7 +33,7 @@ public class ElectronicAssetResult extends AssetResult {
         return new ElectronicAssetResult(
             asset.getId(),
             asset.getBarcodeValue(),
-            asset.getCorporation(),
+            asset.getCorporationName(),
             asset.getDepartment(),
             asset.getLocation(),
             asset.getDivision(),

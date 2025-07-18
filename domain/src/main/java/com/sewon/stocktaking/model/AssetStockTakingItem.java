@@ -77,10 +77,10 @@ public class AssetStockTakingItem extends BaseTime {
 
     public static AssetCheckingStatus getAssetCheckingStatus(Asset asset,
         AssetLocation assetLocation) {
-        if (!asset.getCorporation().equals(assetLocation.getCorporation())) {
+        if (!asset.getCorporation().getId().equals(assetLocation.getCorporation().getId())) {
             return DISABLE;
         }
-        if (asset.getAssetLocation().isEqualLocation(assetLocation.getLocation())) {
+        if (asset.getAssetLocation().getId().equals(assetLocation.getId())) {
             return MATCH;
         } else {
             return MISMATCH;

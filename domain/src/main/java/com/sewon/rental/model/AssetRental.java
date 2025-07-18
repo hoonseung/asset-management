@@ -129,8 +129,12 @@ public class AssetRental extends BaseTime {
         this.rentalStatus = RentalStatus.EXPIRE;
     }
 
-    public boolean isExpire() {
-        return LocalDate.now().isAfter(this.toDate);
+    public boolean isExpireAndChange() {
+        if (LocalDate.now().isAfter(this.toDate)) {
+            rentalExpire();
+            return true;
+        }
+        return false;
     }
 
 
@@ -138,8 +142,8 @@ public class AssetRental extends BaseTime {
         return asset.getBarcodeValue();
     }
 
-    public String getCorporation() {
-        return asset.getCorporation();
+    public String getCorporationName() {
+        return asset.getCorporationName();
     }
 
     public String getDepartment() {

@@ -180,7 +180,7 @@ public class AssetRentalService {
         List<AssetRental> assetRentals = assetRentalRepository.findAllByRentalStatusAndMyAffiliation(
             RENT, affiliationId);
         assetRentals.stream()
-            .filter(AssetRental::isExpire)
+            .filter(AssetRental::isExpireAndChange)
             .forEach(rental -> {
                 String message = rental.getAsset().getBarcodeValue() + "." + affiliationId;
                 rentalProducer.sendingNotification(message,

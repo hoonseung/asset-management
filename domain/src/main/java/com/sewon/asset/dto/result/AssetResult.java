@@ -30,7 +30,7 @@ public class AssetResult {
         return new AssetResult(
             asset.getId(),
             asset.getBarcodeValue(),
-            asset.getCorporation(),
+            asset.getCorporationName(),
             asset.getDepartment(),
             asset.getLocation(),
             asset.getDivision(),

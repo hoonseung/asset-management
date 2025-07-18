@@ -16,6 +16,7 @@ import com.sewon.assetlocation.model.AssetLocation;
 import com.sewon.assettype.model.AssetType;
 import com.sewon.barcode.model.Barcode;
 import com.sewon.common.model.BaseTime;
+import com.sewon.corporation.model.Corporation;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -142,7 +143,11 @@ public class Asset extends BaseTime {
         return this.barcode.getValue();
     }
 
-    public String getCorporation() {
+    public String getCorporationName() {
+        return this.assetLocation.getCorporationName();
+    }
+
+    public Corporation getCorporation() {
         return this.assetLocation.getCorporation();
     }
 

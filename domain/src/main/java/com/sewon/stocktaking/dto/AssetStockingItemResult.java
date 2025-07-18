@@ -25,7 +25,7 @@ public record AssetStockingItemResult(
         return new AssetStockingItemResult(
             asset.getId(),
             asset.getBarcodeValue(),
-            asset.getCorporation(),
+            asset.getCorporationName(),
             asset.getDepartment(),
             asset.getLocation(),
             asset.getDivision(),
