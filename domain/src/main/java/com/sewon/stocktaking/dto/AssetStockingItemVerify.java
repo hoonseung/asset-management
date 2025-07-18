@@ -5,7 +5,8 @@ import java.util.List;
 public record AssetStockingItemVerify(
     List<ItemVerify> matchItem,
     List<ItemVerify> unmatchItem,
-    List<ItemVerify> disableItem
+    List<ItemVerify> disableItem,
+    List<String> notFoundAsset
 ) {
 
     public record ItemVerify(

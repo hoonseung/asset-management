@@ -11,6 +11,7 @@ import com.sewon.account.application.AccountService;
 import com.sewon.account.model.Account;
 import com.sewon.asset.dto.properties.AssetSearchProperties;
 import com.sewon.asset.dto.result.AllAssetResult;
+import com.sewon.asset.exception.AssetErrorCode;
 import com.sewon.asset.model.Asset;
 import com.sewon.asset.repository.AssetSearchRepository;
 import com.sewon.assetlocation.application.AssetLocationService;
@@ -54,7 +55,7 @@ public class StockTakingService {
     private final AccountService accountService;
     private final AssetInboundService assetInboundService;
 
-    private static final int STOCK_TAKING_EXPIRE_DAY = 2; // 5일 기준
+    private static final long STOCK_TAKING_EXPIRE_DAY = 14; // 14일 기준
 
     @Qualifier("stockTakingProducer")
     private final NotificationProducer stockTakingProducer;
@@ -87,7 +88,6 @@ public class StockTakingService {
         if (stockTaking.isPresent()) {
             assetStockTaking = stockTaking.get();
 
-            // 현재일이 실사 시작일 + 2일과 같을 때
             long day = STOCK_TAKING_EXPIRE_DAY - ChronoUnit.DAYS.between(
                 assetStockTaking.getStartingDate(), LocalDate.now());
             if (day > 0) {
@@ -97,9 +97,11 @@ public class StockTakingService {
                     STOCK_TAKING_LOCATION_EXPIRATION_KEY.getKey());
             }
 
-            // 실사 시작일 1일 + 1일 보다  (총 2일) 보다 이후 인지 확인
-            if (LocalDate.now().isAfter(assetStockTaking.getStartingDate().plusDays(1))) {
-                assetStockTaking.setAuditingDate(assetStockTaking.getStartingDate().plusDays(1));
+            // 실사 시작일 13일 + 1일 보다  (총 14일) 보다 이후 인지 확인
+            if (LocalDate.now().isAfter(
+                assetStockTaking.getStartingDate().plusDays(STOCK_TAKING_EXPIRE_DAY - 1))) {
+                assetStockTaking.setAuditingDate(
+                    assetStockTaking.getStartingDate().plusDays(STOCK_TAKING_EXPIRE_DAY - 1));
                 throw new DomainException(STOCK_TAKING_EXPIRATION);
             } else {
                 assetLocation = assetStockTaking.getAssetLocation();
@@ -117,7 +119,8 @@ public class StockTakingService {
 
         barcodes.forEach(value ->
         {
-            Asset asset = barcodeService.findAssetByValue(value);
+            Asset asset = barcodeService.findAssetByValue(value)
+                .orElseThrow(() -> new DomainException(AssetErrorCode.ASSET_NOT_FOUND));
             AssetStockTakingItem item = AssetStockTakingItem.of(
                 assetLocation, asset, assetStockTaking);
             if (Boolean.TRUE.equals(item.getIsChanged())) {
@@ -143,25 +146,27 @@ public class StockTakingService {
         List<ItemVerify> match = new ArrayList<>();
         List<ItemVerify> unmatch = new ArrayList<>();
         List<ItemVerify> disable = new ArrayList<>();
+        List<String> notFound = new ArrayList<>();
 
         barcodes.forEach(value ->
-        {
-            Asset asset = barcodeService.findAssetByValue(value);
-            if (AssetStockTakingItem.disable(
-                AssetStockTakingItem.getAssetCheckingStatus(asset, assetLocation))) {
-                disable.add(new ItemVerify(value, asset.getLocation(),
-                    assetLocation.getLocation(), DISABLE.name()));
-            } else if (AssetStockTakingItem.change(
-                AssetStockTakingItem.getAssetCheckingStatus(asset, assetLocation))) {
-                unmatch.add(new ItemVerify(value, asset.getLocation(),
-                    assetLocation.getLocation(), MISMATCH.name()));
-            } else {
-                match.add(new ItemVerify(value, asset.getLocation(),
-                    assetLocation.getLocation(), MATCH.name()));
-            }
+            barcodeService.findAssetByValue(value)
+                .ifPresentOrElse(presentAsset -> {
+                    if (AssetStockTakingItem.disable(
+                        AssetStockTakingItem.getAssetCheckingStatus(presentAsset, assetLocation))) {
+                        disable.add(new ItemVerify(value, presentAsset.getLocation(),
+                            assetLocation.getLocation(), DISABLE.name()));
+                    } else if (AssetStockTakingItem.change(
+                        AssetStockTakingItem.getAssetCheckingStatus(presentAsset, assetLocation))) {
+                        unmatch.add(new ItemVerify(value, presentAsset.getLocation(),
+                            assetLocation.getLocation(), MISMATCH.name()));
+                    } else {
+                        match.add(new ItemVerify(value, presentAsset.getLocation(),
+                            assetLocation.getLocation(), MATCH.name()));
+                    }
+                }, () -> notFound.add(value))
+        );
 
-        });
-        return new AssetStockingItemVerify(match, unmatch, disable);
+        return new AssetStockingItemVerify(match, unmatch, disable, notFound);
     }
 
 
