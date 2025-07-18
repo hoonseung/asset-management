@@ -3,6 +3,7 @@ package com.sewon.dsl;
 import com.querydsl.core.types.PathMetadataFactory;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathInits;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sewon.account.model.QAccount;
@@ -36,18 +37,17 @@ public class AssetDynamicSearchRepository implements AssetSearchRepository {
 
     private final JPAQueryFactory queryFactory;
 
+    private final QAsset asset = new QAsset(PathMetadataFactory.forVariable("asset"),
+        // 해당 엔티티들 한번에 초기화 하기 위해 연관 엔티티 지정
+        new PathInits("barcode", "assetLocation.affiliation.corporation",
+            "assetType.assetType", "account"));
+    private final QElectronicAsset electronicAsset = new QElectronicAsset(
+        PathMetadataFactory.forVariable("electronic"),
+        new PathInits("barcode", "assetLocation.affiliation.corporation",
+            "assetType.assetType", "account"));
+
     @Override
     public List<AllAssetResult> searchAssets(AssetSearchProperties properties) {
-        QAsset asset = new QAsset(PathMetadataFactory.forVariable("asset"),
-            // 해당 엔티티들 한번에 초기화 하기 위해 연관 엔티티 지정
-            new PathInits("barcode", "assetLocation.affiliation.corporation",
-                "assetType.assetType", "account"));
-
-        QElectronicAsset electronicAsset = new QElectronicAsset(
-            PathMetadataFactory.forVariable("electronic"),
-            new PathInits("barcode", "assetLocation.affiliation.corporation",
-                "assetType.assetType", "account"));
-
         return getAssetQuery(properties, asset, electronicAsset)
             .stream()
             .map(this::from)
@@ -110,15 +110,29 @@ public class AssetDynamicSearchRepository implements AssetSearchRepository {
 
     @Override
     public List<RentalResult> searchRentalEnableAssets(AssetSearchProperties properties) {
-        QAsset asset = QAsset.asset;
         QAssetRental assetRental = QAssetRental.assetRental;
+        QCorporation corporation = asset.assetLocation.affiliation.corporation;
+        QAffiliation affiliation = asset.assetLocation.affiliation;
+        QAssetLocation assetLocation = asset.assetLocation;
+        QAssetType assetType = asset.assetType;
+
+        QAssetRental joinRental = QAssetRental.assetRental;
+
         JPAQuery<Asset> query = queryFactory
             .selectFrom(asset)
             .leftJoin(asset.barcode).fetchJoin()
-            .leftJoin(assetRental).on(assetRental.asset.eq(asset))
+            .leftJoin(assetRental).on(assetRental.asset.eq(asset)
+                .and(assetRental.createdDate.eq(
+                    // asset_id eq 인 것 들 중 제일 최신 렌탈 레코드 가져오기
+                    JPAExpressions.select(assetRental.createdDate.max())
+                        .from(joinRental)
+                        .where(joinRental.asset.id.eq(asset.id))
+                )))
             .where(
-                eqLocation(asset.assetLocation, properties.locationId()),
-                eqParentAndChildeType(asset.assetType, properties.parentTypeId(),
+                eqCorporation(corporation, properties.corporationId()),
+                eqAffiliation(affiliation, properties.affiliationId()),
+                eqLocation(assetLocation, properties.locationId()),
+                eqParentAndChildeType(assetType, properties.parentTypeId(),
                     properties.childTypeId()),
                 enableRental(assetRental)
             );
