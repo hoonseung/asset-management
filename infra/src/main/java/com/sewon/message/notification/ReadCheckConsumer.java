@@ -5,9 +5,10 @@ import static com.sewon.config.RabbitMQConfig.NOTIFY_READ_QUEUE;
 import com.sewon.jpa.notification.JpaNotificationRepository;
 import com.sewon.message.repository.SseEmitterRepository;
 import com.sewon.notification.repository.NotificationCacheRepository;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReadCheckConsumer extends AbstractConsumer {
 
-    private final Map<Long, Set<Long>> notificationUpdateStore = new ConcurrentHashMap<>();
     private final NotificationCacheRepository notificationCacheRepository;
 
     public ReadCheckConsumer(JpaNotificationRepository jpaNotificationRepository,
@@ -54,13 +54,16 @@ public class ReadCheckConsumer extends AbstractConsumer {
 
         String hashKey = "readCheck";
 
-        notificationCacheRepository.getMap(hashKey).forEach((accountId, notifyList) -> {
-            if (!notifyList.isEmpty()) {
+        Map<String, Set<Long>> map = notificationCacheRepository.getMap(hashKey);
+        if (!map.isEmpty()) {
+            List<Long> accountIds = new ArrayList<>();
+            map.forEach((accountId, notifyList) -> {
                 jpaNotificationRepository.readUpdateByIds(notifyList);
-                notificationCacheRepository.removeValues(hashKey, accountId);
-                log.info("finished accountId: {} flushNotificationUpdate", accountId);
-            }
-        });
+                accountIds.add(Long.valueOf(accountId));
+                log.info("updated accountId: {} flushNotificationUpdate", accountId);
+            });
+            notificationCacheRepository.removeValues(hashKey, accountIds.toArray(Long[]::new));
+        }
     }
 
 

@@ -103,7 +103,7 @@ public class CacheNotificationRepository implements NotificationCacheRepository 
     }
 
     @Override
-    public void removeValues(String hash, String... key) {
+    public void removeValues(String hash, Long... key) {
         strRedisTemplate.opsForHash().delete(hash, key);
     }
 }

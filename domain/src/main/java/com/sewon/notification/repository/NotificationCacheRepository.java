@@ -20,6 +20,6 @@ public interface NotificationCacheRepository {
 
     Map<String, Set<Long>> getMap(String hash);
 
-    void removeValues(String hash, String... key);
+    void removeValues(String hash, Long... key);
 
 }
