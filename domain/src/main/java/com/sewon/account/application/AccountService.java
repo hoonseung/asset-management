@@ -13,6 +13,7 @@ import com.sewon.common.exception.DomainException;
 import com.sewon.security.application.JwtBlackListService;
 import com.sewon.security.application.PasswordHasher;
 import java.time.Duration;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,6 +91,13 @@ public class AccountService {
         }
         jwtBlackListService.blacklistRefreshToken(id);
         return true;
+    }
+
+    public List<AccountResult> findAllAccount() {
+        return accountRepository.findAll()
+            .stream()
+            .map(AccountResult::from)
+            .toList();
     }
 
 
