@@ -18,6 +18,16 @@ spring:
   config:
     import: application.yml, application-infra.yml
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
 
 jwt:
   secret: ${JWT_SECRET:JWSEREWSEWQEASDASDADWASDADASS32SS112355WASDASADAKBDLTMWSD}

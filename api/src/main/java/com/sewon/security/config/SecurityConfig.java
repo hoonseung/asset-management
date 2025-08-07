@@ -42,6 +42,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST,
                         "/affiliations", "/locations", "/asset-types", "/corporations")
                     .permitAll()
+                    .requestMatchers("/actuator/**").permitAll()
                     .anyRequest().authenticated())
             .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)

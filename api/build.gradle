@@ -14,12 +14,15 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    implementation "io.micrometer:micrometer-registry-prometheus"
 }
 
 
 bootBuildImage {
     builder = "docker.io/paketobuildpacks/builder-jammy-base"
     imageName = project.findProperty("imageName") ?: "${project.name}"
+    publish = project.findProperty("publishImage")?.toString()?.toBoolean() ?: false
     environment = ["BP.JVM_VERSION": "21.*"]
 
 
