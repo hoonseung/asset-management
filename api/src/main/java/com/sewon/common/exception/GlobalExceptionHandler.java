@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 
 @Slf4j
 @RestControllerAdvice
@@ -71,6 +72,15 @@ public class GlobalExceptionHandler {
         log.error("io ex cause: {}",
             ex.getCause() != null ? ex.getCause().toString() : "ex.cause is null");
         log.error("io ex message: {}", ex.getMessage());
+        return ResponseEntity.internalServerError().build();
+    }
+
+    @ExceptionHandler(AsyncRequestTimeoutException.class)
+    public ResponseEntity<Void> asyncRequestTimeoutExceptionHandler(
+        AsyncRequestTimeoutException ex) {
+        log.error("ex cause: {}",
+            ex.getCause() != null ? ex.getCause().toString() : "ex.cause is null");
+        log.error("ex message: {}", ex.getMessage());
         return ResponseEntity.internalServerError().build();
     }
 
