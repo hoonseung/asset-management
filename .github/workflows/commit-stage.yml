@@ -26,15 +26,15 @@ jobs:
           java-version: 21
           cache: gradle
 
-      - name: Build Java project for CodeQL
-        run: |
-          chmod +x gradlew
-          ./gradlew :api:build
-
       - name: CodeQL Initialize
         uses: github/codeql-action/init@v3
         with:
           languages: java
+
+      - name: Build Java project for CodeQL
+        run: |
+          chmod +x gradlew
+          ./gradlew :api:build --no-daemon 
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
