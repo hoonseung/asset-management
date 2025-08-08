@@ -81,6 +81,14 @@ jobs:
           severity-cutoff: high
           acs-report-enable: true
 
+      - name: CodeQL Initialize
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
       - name: Upload vulnerability report
         uses: github/codeql-action/upload-sarif@v3
         if: success() || failure()
